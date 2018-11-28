@@ -31,6 +31,9 @@ class Api:
 		r = requests.get(url, headers=headers)
 		if r.status_code == 200:
 			return r.json()
+		else:
+			print("Error [%d][%s]" % (r.status_code, r.content))
+			return r
 
 	def apps(self):
 		return self._api_call("/v1/apps")

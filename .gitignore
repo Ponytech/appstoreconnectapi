@@ -3,6 +3,8 @@
 
 # Packaging files:
 *.egg*
+dist/*
+MANIFEST
 
 # Sphinx docs:
 build

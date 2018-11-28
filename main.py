@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from AppstoreConnect import Api
+from appstoreconnect import Api
 
 
 if __name__ == "__main__":
