@@ -36,7 +36,6 @@ class Api:
 		url = "%s%s" % (BASE_API, route)
 		r = {}
 
-		print(url)
 		if method == HttpMethod.GET:
 			r = requests.get(url, headers=headers)
 		elif method == HttpMethod.POST:
@@ -104,6 +103,22 @@ class Api:
 	def set_uses_non_encryption_exemption_setting(self, build_id, uses_non_encryption_exemption_setting):
 		post_data = {'data': {'attributes': {'usesNonExemptEncryption': uses_non_encryption_exemption_setting}, 'id': build_id, 'type': 'builds'}}
 		return self._api_call("/v1/builds/" + build_id, HttpMethod.PATCH, post_data)
+
+	#betaBuildLocalizations
+
+	def beta_build_localizations_for_build(self, build_id):
+		return self._api_call("/v1/betaBuildLocalizations?filter[build]=" + build_id, HttpMethod.GET, None)
+
+	def beta_build_localizations_for_build_and_locale(self, build_id, locale):
+		return self._api_call("/v1/betaBuildLocalizations?filter[build]=" + build_id + "&filter[locale]=" + locale, HttpMethod.GET, None)
+
+	def create_beta_build_localization(self, build_id, locale, whatsNew):
+		post_data = {'data': { 'type': 'betaBuildLocalizations', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}, 'attributes': { 'locale': locale, 'whatsNew': whatsNew}}}
+		return self._api_call("/v1/betaBuildLocalizations", HttpMethod.POST, post_data)
+
+	def modify_beta_build_localization(self, beta_build_localization_id, whatsNew):
+		post_data = {'data': { 'type': 'betaBuildLocalizations', 'id': beta_build_localization_id, 'attributes': {'whatsNew': whatsNew}}}
+		return self._api_call("/v1/betaBuildLocalizations/" + beta_build_localization_id, HttpMethod.PATCH, post_data)
 
 	#betaAppReviewSubmissions
 
