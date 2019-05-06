@@ -45,16 +45,21 @@ class Api:
 			headers["Content-Type"] = "application/json"
 			r = requests.patch(url=url, headers=headers, data=json.dumps(post_data))
 
-		if r.status_code in range(200,299):
+		contentType = r.headers['content-type']
+
+		if contentType == "application/json":
 			return r.json()
 		else:
-			print("Error [%d][%s]" % (r.status_code, r.content))
-			return r
+			if r.status_code not in range(200,299):
+				print("Error [%d][%s]" % (r.status_code, r.content))
 
 	#apps
 
 	def apps(self):
 		return self._api_call("/v1/apps", HttpMethod.GET, None)
+
+	def app_for_sku(self, sku):
+		return self._api_call("/v1/apps?filter[sku]=" + sku, HttpMethod.GET, None)
 
 	#users
 
@@ -79,6 +84,11 @@ class Api:
 	def beta_group_info(self, beta_group_id):
 		return self._api_call("/v1/betaGroups/" + beta_group_id, HttpMethod.GET, None)
 
+	def add_build_to_beta_group(self, beta_group_id, build_id):
+		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
+
+		return self._api_call("/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
+
 	#betaTesters
 
 	def beta_testers(self):
@@ -96,6 +106,9 @@ class Api:
 
 	def builds(self):
 		return self._api_call("/v1/builds", HttpMethod.GET, None)
+
+	def builds_for_app(self, app_id):
+		return self._api_call("/v1/builds?filter[app]=" + app_id, HttpMethod.GET, None)
 
 	def build_processing_state(self, app_id, version):
 		return self._api_call("/v1/builds?filter[app]=" + app_id + "&filter[version]=" + version + "&fields[builds]=processingState", HttpMethod.GET, None)
