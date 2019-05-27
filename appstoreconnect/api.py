@@ -52,7 +52,7 @@ class Api:
 		if content_type == "application/json":
 			return r.json()
 		else:
-			if r.status_code not in range(200, 299):
+			if not 200 <= r.status_code <= 299:
 				print("Error [%d][%s]" % (r.status_code, r.content))
 
 	#apps
