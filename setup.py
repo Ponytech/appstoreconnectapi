@@ -15,7 +15,7 @@ REQUIRES_PYTHON = '>=3.6.0'
 VERSION = None
 
 REQUIRED = [
-    'requests', 'PyJWT',
+    'requests', 'PyJWT', 'cryptography'
 ]
 
 EXTRAS = {
