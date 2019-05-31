@@ -41,3 +41,6 @@ tramp
 Thumbs.db
 Desktop.ini
 git 
+
+# venv
+.venv/
