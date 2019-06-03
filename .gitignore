@@ -44,3 +44,6 @@ git
 
 # venv
 .venv/
+
+# Apple AuthKeys
+AuthKey_*
