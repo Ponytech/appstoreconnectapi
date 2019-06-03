@@ -42,15 +42,48 @@ class Api:
 		return Resource(payload.get('data', {}))
 
 	def _get_resources(self, Resource):
-		url = "%s%s" % (BASE_API, Resource.endpoint)
+		class IterResource:
+			def __init__(self, api, url):
+				self.api = api
+				self.url = url
+				self.index = 0
+				self.total_length = None
+				self.payload = None
 
-		while url:
-			payload = self._api_call(url)
+			def __iter__(self):
+				return self
 
-			for data in payload.get('data', []):
+			def __repr__(self):
+				return "Iterator over %s resource" % Resource.__name__
+
+			def __len__(self):
+				if not self.payload:
+					self.fetch_page()
+				return self.total_length
+
+			def __next__(self):
+				if not self.payload:
+					self.fetch_page()
+
+				data = self.payload.get('data', [])[self.index]
+				self.index += 1
+				if self.index == len(self.payload.get('data', [])):
+					self.url = self.payload.get('links', {}).get('next', None)
+					self.index = 0
+					if self.url:
+						self.fetch_page()
+					else:
+						raise StopIteration()
+
 				resource = Resource(data)
-				yield resource
-			url = payload.get('links', {}).get('next', None)
+				return resource
+
+			def fetch_page(self):
+				self.payload = self.api._api_call(self.url)
+				self.total_length = self.payload.get('meta', {}).get('paging', {}).get('total', 0)
+
+		url = "%s%s" % (BASE_API, Resource.endpoint)
+		return IterResource(self, url)
 
 	def _api_call(self, url, method=HttpMethod.GET, post_data=None):
 		headers = {"Authorization": "Bearer %s" % self.token}
