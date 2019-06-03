@@ -12,6 +12,9 @@ if __name__ == "__main__":
 
 	# list all apps
 	apps = api.list_apps()
-	print("%d apps found" % len(apps))
 	for app in apps:
-		print(app.name)
+		print(app.name, app.sku)
+
+	# filter apps
+	apps = api.list_apps(filters={'sku': 'DINORUSH', 'name': 'Dino Rush'})
+	print("%d apps found" % len(apps))

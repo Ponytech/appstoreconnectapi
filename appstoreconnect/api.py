@@ -17,6 +17,10 @@ class HttpMethod(Enum):
 	PATCH = 3
 
 
+class APIError(Exception):
+	pass
+
+
 class Api:
 
 	def __init__(self, key_id, key_file, issuer_id):
@@ -41,7 +45,7 @@ class Api:
 		payload = self._api_call(url)
 		return Resource(payload.get('data', {}))
 
-	def _get_resources(self, Resource):
+	def _get_resources(self, Resource, filters=None):
 		class IterResource:
 			def __init__(self, api, url):
 				self.api = api
@@ -83,6 +87,12 @@ class Api:
 				self.total_length = self.payload.get('meta', {}).get('paging', {}).get('total', 0)
 
 		url = "%s%s" % (BASE_API, Resource.endpoint)
+		# add filters to the URL
+		if type(filters) is dict:
+			for index, (filter_name, filter_value) in enumerate(filters.items()):
+				separator = '?' if index == 0 else '&'
+				filter_name = "filter[%s]" % filter_name
+				url = "%s%s%s=%s" % (url, separator, filter_name, filter_value)
 		return IterResource(self, url)
 
 	def _api_call(self, url, method=HttpMethod.GET, post_data=None):
@@ -103,10 +113,13 @@ class Api:
 		content_type = r.headers['content-type']
 
 		if content_type == "application/json":
-			return r.json()
+			payload = r.json()
+			if 'errors' in payload:
+				raise APIError(payload.get('errors', [])[0].get('detail', 'Unknown error'))
+			return payload
 		else:
 			if not 200 <= r.status_code <= 299:
-				print("Error [%d][%s]" % (r.status_code, r.content))
+				raise APIError("HTTP error [%d][%s]" % (r.status_code, r.content))
 
 	@property
 	def token(self):
@@ -117,36 +130,36 @@ class Api:
 		return self._token
 
 	# Users and Roles
-	def list_users(self):
+	def list_users(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_users
 		:return: an iterator over User resources
 		"""
-		return self._get_resources(User)
+		return self._get_resources(User, filters)
 
-	def list_invited_users(self):
+	def list_invited_users(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_invited_users
 		:return: an iterator over UserInvitation resources
 		"""
-		return self._get_resources(UserInvitation)
+		return self._get_resources(UserInvitation, filters)
 
 	# Beta Testers and Groups
-	def list_beta_testers(self):
+	def list_beta_testers(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_testers
 		:return: an iterator over BetaTester resources
 		"""
-		return self._get_resources(BetaTester)
+		return self._get_resources(BetaTester, filters)
 
-	def list_beta_groups(self):
+	def list_beta_groups(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_groups
 		:return: an iterator over BetaGroup resources
 		"""
-		return self._get_resources(BetaGroup)
+		return self._get_resources(BetaGroup, filters)
 
-	# TODO: implement these function using Resource
+	# TODO: implement POST requests using Resource
 	def create_beta_tester(self, beta_group_id, email, first_name, last_name):
 		post_data = {'data': {'attributes': {'email': email, 'firstName': first_name, 'lastName': last_name}, 'relationships': {'betaGroups': {'data': [{ 'id': beta_group_id ,'type': 'betaGroups'}]}}, 'type': 'betaTesters'}}
 		return self._api_call("/v1/betaTesters", HttpMethod.POST, post_data)
@@ -168,107 +181,95 @@ class Api:
 		"""
 		return self._get_resource(App, app_ip)
 
-	def list_apps(self):
+	def list_apps(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_apps
 		:return: an iterator over App resources
 		"""
-		return self._get_resources(App)
+		return self._get_resources(App, filters)
 
-	# TODO: handle filters on get_resources()
-	def app_for_sku(self, sku):
-		return self._api_call(BASE_API + "/v1/apps?filter[sku]=" + sku)
-
-	def list_prerelease_versions(self):
+	def list_prerelease_versions(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
 		:return: an iterator over PreReleaseVersions resources
 		"""
-		return self._get_resources(PreReleaseVersions)
+		return self._get_resources(PreReleaseVersions, filters)
 
-	def list_beta_app_localizations(self):
+	def list_beta_app_localizations(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_app_localizations
 		:return: an iterator over BetaAppLocalizations resources
 		"""
-		return self._get_resources(BetaAppLocalizations)
+		return self._get_resources(BetaAppLocalizations, filters)
 
-	def list_app_encryption_declarations(self):
+	def list_app_encryption_declarations(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_app_encryption_declarations
 		:return: an iterator over AppEncryptionDeclaration resources
 		"""
-		return self._get_resources(AppEncryptionDeclaration)
+		return self._get_resources(AppEncryptionDeclaration, filters)
 
-	def list_beta_license_agreements(self):
+	def list_beta_license_agreements(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_license_agreements
 		:return: an iterator over BetaLicenseAgreement resources
 		"""
-		return self._get_resources(BetaLicenseAgreement)
+		return self._get_resources(BetaLicenseAgreement, filters)
 
 	# Build Resources
-	def list_builds(self):
+	def list_builds(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_builds
 		:return: an iterator over Build resources
 		"""
-		return self._get_resources(Build)
+		return self._get_resources(Build, filters)
 
-	# TODO: handle filters on get_resources()
-	def builds_for_app(self, app_id):
-		return self._api_call(BASE_API + "/v1/builds?filter[app]=" + app_id)
-
+	# TODO: handle fields on get_resources()
 	def build_processing_state(self, app_id, version):
 		return self._api_call(BASE_API + "/v1/builds?filter[app]=" + app_id + "&filter[version]=" + version + "&fields[builds]=processingState")
 
-	# TODO: implement this function using Resource
+	# TODO: implement POST requests using Resource
 	def set_uses_non_encryption_exemption_setting(self, build_id, uses_non_encryption_exemption_setting):
 		post_data = {'data': {'attributes': {'usesNonExemptEncryption': uses_non_encryption_exemption_setting}, 'id': build_id, 'type': 'builds'}}
 		return self._api_call(BASE_API + "/v1/builds/" + build_id, HttpMethod.PATCH, post_data)
 
-	def list_build_beta_details(self):
+	def list_build_beta_details(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_build_beta_details
 		:return: an iterator over BuildBetaDetails resources
 		"""
-		return self._get_resources(BuildBetaDetails)
+		return self._get_resources(BuildBetaDetails, filters)
 
-	# TODO: handle filters on get_resources()
-	def beta_build_localizations_for_build(self, build_id):
-		return self._api_call(BASE_API + "/v1/betaBuildLocalizations?filter[build]=" + build_id)
-
-	def beta_build_localizations_for_build_and_locale(self, build_id, locale):
-		return self._api_call(BASE_API +  "/v1/betaBuildLocalizations?filter[build]=" + build_id + "&filter[locale]=" + locale)
-
+	# TODO: handle relationships on get_resources()
 	def create_beta_build_localization(self, build_id, locale, whatsNew):
 		post_data = {'data': { 'type': 'betaBuildLocalizations', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}, 'attributes': { 'locale': locale, 'whatsNew': whatsNew}}}
 		return self._api_call(BASE_API +  "/v1/betaBuildLocalizations", HttpMethod.POST, post_data)
 
+	# TODO: implement POST requests using Resource
 	def modify_beta_build_localization(self, beta_build_localization_id, whatsNew):
 		post_data = {'data': { 'type': 'betaBuildLocalizations', 'id': beta_build_localization_id, 'attributes': {'whatsNew': whatsNew}}}
 		return self._api_call(BASE_API +  "/v1/betaBuildLocalizations/" + beta_build_localization_id, HttpMethod.PATCH, post_data)
 
-	def list_beta_build_localizations(self):
+	def list_beta_build_localizations(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_build_localizations
 		:return: an iterator over BetaBuildLocalization resources
 		"""
-		return self._get_resources(BetaBuildLocalization)
+		return self._get_resources(BetaBuildLocalization, filters)
 
-	def list_beta_app_review_details(self):
+	def list_beta_app_review_details(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_app_review_details
 		:return: an iterator over BetaAppReviewDetail resources
 		"""
-		return self._get_resources(BetaAppReviewDetail)
+		return self._get_resources(BetaAppReviewDetail, filters)
 
-	def list_beta_app_review_submissions(self):
+	def list_beta_app_review_submissions(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_app_review_submissions
 		:return: an iterator over BetaAppReviewSubmission resources
 		"""
-		return self._get_resources(BetaAppReviewSubmission)
+		return self._get_resources(BetaAppReviewSubmission, filters)
 
 	# TODO: implement these function using Resource
 	def submit_app_for_beta_review(self, build_id):
