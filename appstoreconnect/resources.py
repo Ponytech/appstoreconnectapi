@@ -110,4 +110,11 @@ class UserInvitation(Resource):
 
 class FinanceReport(Resource):
 	endpoint = '/v1/financeReports'
-	attributes = ''
+	filters = 'https://developer.apple.com/documentation/appstoreconnectapi/download_finance_reports'
+
+
+class SalesReport(Resource):
+	endpoint = '/v1/salesReports'
+	filters = 'https://developer.apple.com/documentation/appstoreconnectapi/download_sales_and_trends_reports'
+
+

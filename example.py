@@ -18,3 +18,10 @@ if __name__ == "__main__":
 	# filter apps
 	apps = api.list_apps(filters={'sku': 'DINORUSH', 'name': 'Dino Rush'})
 	print("%d apps found" % len(apps))
+
+	# download sales report
+	api.download_sales_and_trends_reports(
+		filters={'vendorNumber': '123456789', 'frequency': 'WEEKLY', 'reportDate': '2019-06-09'}, save_to='report.csv')
+
+	# download finance report
+	api.download_finance_reports(filters={'vendorNumber': '123456789', 'reportDate': '2019-06'}, save_to='finance.csv')

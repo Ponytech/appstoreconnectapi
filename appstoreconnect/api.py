@@ -1,5 +1,7 @@
 import requests
 import jwt
+import gzip
+from pathlib import Path
 from datetime import datetime, timedelta
 import time
 import json
@@ -87,13 +89,16 @@ class Api:
 				self.total_length = self.payload.get('meta', {}).get('paging', {}).get('total', 0)
 
 		url = "%s%s" % (BASE_API, Resource.endpoint)
-		# add filters to the URL
+		url = self._build_filters(url, filters)
+		return IterResource(self, url)
+
+	def _build_filters(self, url, filters):
 		if type(filters) is dict:
 			for index, (filter_name, filter_value) in enumerate(filters.items()):
 				separator = '?' if index == 0 else '&'
 				filter_name = "filter[%s]" % filter_name
 				url = "%s%s%s=%s" % (url, separator, filter_name, filter_value)
-		return IterResource(self, url)
+		return url
 
 	def _api_call(self, url, method=HttpMethod.GET, post_data=None):
 		headers = {"Authorization": "Bearer %s" % self.token}
@@ -117,9 +122,19 @@ class Api:
 			if 'errors' in payload:
 				raise APIError(payload.get('errors', [])[0].get('detail', 'Unknown error'))
 			return payload
+		elif content_type == 'application/a-gzip':
+			# TODO implement stream decompress
+			data_gz = b""
+			for chunk in r.iter_content(1024 * 1024):
+				if chunk:
+					data_gz = data_gz + chunk
+
+			data = gzip.decompress(data_gz)
+			return data.decode("utf-8")
 		else:
 			if not 200 <= r.status_code <= 299:
 				raise APIError("HTTP error [%d][%s]" % (r.status_code, r.content))
+			return r
 
 	@property
 	def token(self):
@@ -276,6 +291,46 @@ class Api:
 		post_data = {'data': { 'type': 'betaAppReviewSubmissions', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}}}
 		return self._api_call(BASE_API + "/v1/betaAppReviewSubmissions", HttpMethod.POST, post_data)
 
-	# finance reports
-	def finance_reports(self):
-		return self._get_resources(FinanceReport)
+	# Reporting
+	def download_finance_reports(self, filters=None, save_to=None):
+		# setup required filters if not provided
+		for required_key, default_value in (
+				('regionCode', 'ZZ'),
+				('reportType', 'FINANCIAL'),
+				# vendorNumber is required but we cannot provide a default value
+				# reportDate is required but we cannot provide a default value
+		):
+			if required_key not in filters:
+				filters[required_key] = default_value
+
+		url = "%s%s" % (BASE_API, FinanceReport.endpoint)
+		url = self._build_filters(url, filters)
+		response = self._api_call(url)
+
+		if save_to:
+			file = Path(save_to)
+			file.write_text(response, 'utf-8')
+
+		return response
+
+	def download_sales_and_trends_reports(self, filters=None, save_to=None):
+		# setup required filters if not provided
+		for required_key, default_value in (
+				('frequency', 'DAILY'),
+				('reportSubType', 'SUMMARY'),
+				('reportType', 'SALES'),
+				# vendorNumber is required but we cannot provide a default value
+		):
+			if required_key not in filters:
+				filters[required_key] = default_value
+
+		url = "%s%s" % (BASE_API, SalesReport.endpoint)
+		url = self._build_filters(url, filters)
+		response = self._api_call(url)
+
+		if save_to:
+			file = Path(save_to)
+			file.write_text(response, 'utf-8')
+
+		return response
+
