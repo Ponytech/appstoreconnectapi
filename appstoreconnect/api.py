@@ -47,7 +47,11 @@ class Api:
 		payload = self._api_call(url)
 		return Resource(payload.get('data', {}))
 
-	def _get_resources(self, Resource, filters=None):
+	def _get_related_resource(self, Resource, fullUrl):
+		payload = self._api_call(fullUrl)
+		return Resource(payload.get('data', {}), self)
+
+	def _get_resources(self, Resource, filters=None, fullUrl=None):
 		class IterResource:
 			def __init__(self, api, url):
 				self.api = api
@@ -70,25 +74,26 @@ class Api:
 			def __next__(self):
 				if not self.payload:
 					self.fetch_page()
-
-				data = self.payload.get('data', [])[self.index]
-				self.index += 1
-				if self.index == len(self.payload.get('data', [])):
+				if self.index < len(self.payload.get('data', [])):
+					data = self.payload.get('data', [])[self.index]
+					self.index += 1
+					return Resource(data, self.api)
+				else:
 					self.url = self.payload.get('links', {}).get('next', None)
 					self.index = 0
 					if self.url:
 						self.fetch_page()
-					else:
-						raise StopIteration()
-
-				resource = Resource(data)
-				return resource
+						if self.index < len(self.payload.get('data', [])):
+							data = self.payload.get('data', [])[self.index]
+							self.index += 1
+							return Resource(data, self.api)
+					raise StopIteration()
 
 			def fetch_page(self):
 				self.payload = self.api._api_call(self.url)
 				self.total_length = self.payload.get('meta', {}).get('paging', {}).get('total', 0)
 
-		url = "%s%s" % (BASE_API, Resource.endpoint)
+		url = fullUrl if fullUrl else "%s%s" % (BASE_API, Resource.endpoint)
 		url = self._build_filters(url, filters)
 		return IterResource(self, url)
 

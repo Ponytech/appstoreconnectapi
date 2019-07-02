@@ -1,22 +1,41 @@
 from abc import ABC, abstractmethod
-
+import sys
 
 class Resource(ABC):
 
-	def __init__(self, data):
+	def __init__(self, data, api):
 		self._data = data
+		self._api = api
 
 	def __getattr__(self, item):
-		try:
+		if item == 'id':
+			return self._data.get('id')
+		if item in self._data.get('attributes', {}):
 			return self._data.get('attributes', {})[item]
-		except KeyError:
-			raise AttributeError('%s have no attributes %s' % (self.type_name, item))
+		if item in self._data.get('relationships', {}):
+			def callable():
+				# Try to fetch relationship
+				nonlocal item
+				is_resources = item[-1] == 's'
+				try:
+					item_cls = getattr(sys.modules[__name__], item[0].upper() + item[1:].rstrip('s'))
+				except AttributeError:
+					item_cls = Resource
+				url = self._data.get('relationships', {})[item]['links']['related']
+				# List of resources
+				if item[-1] == 's':
+					return self._api._get_resources(item_cls, fullUrl=url)
+				else:
+					return self._api._get_related_resource(item_cls, fullUrl=url)
+			return callable
+
+		raise AttributeError('%s have no attributes %s' % (self.type_name, item))
 
 	def __repr__(self):
 		return '%s id %s' % (self.type_name, self._data.get('id'))
 
 	def __dir__(self):
-		return self._data.get('attributes', {}).keys()
+		return list(self._data.get('attributes', {}).keys()) + list(self._data.get('relationships', {}).keys())
 
 	@property
 	def type_name(self):
