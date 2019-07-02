@@ -18,12 +18,12 @@ class Resource(ABC):
 				nonlocal item
 				is_resources = item[-1] == 's'
 				try:
-					item_cls = getattr(sys.modules[__name__], item[0].upper() + item[1:].rstrip('s'))
+					item_cls = getattr(sys.modules[__name__], item[0].upper() + (item[1:-1] if is_resources else item[1:]))
 				except AttributeError:
 					item_cls = Resource
 				url = self._data.get('relationships', {})[item]['links']['related']
 				# List of resources
-				if item[-1] == 's':
+				if is_resources:
 					return self._api._get_resources(item_cls, fullUrl=url)
 				else:
 					return self._api._get_related_resource(item_cls, fullUrl=url)
@@ -35,7 +35,7 @@ class Resource(ABC):
 		return '%s id %s' % (self.type_name, self._data.get('id'))
 
 	def __dir__(self):
-		return list(self._data.get('attributes', {}).keys()) + list(self._data.get('relationships', {}).keys())
+		return ['id'] + list(self._data.get('attributes', {}).keys()) + list(self._data.get('relationships', {}).keys())
 
 	@property
 	def type_name(self):
@@ -66,12 +66,12 @@ class App(Resource):
 	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/app/attributes'
 
 
-class PreReleaseVersions(Resource):
+class PreReleaseVersion(Resource):
 	endpoint = '/v1/preReleaseVersions'
 	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/preReleaseVersion/attributes'
 
 
-class BetaAppLocalizations(Resource):
+class BetaAppLocalization(Resource):
 	endpoint = '/v1/betaAppLocalizations'
 	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/betaAppLocalization/attributes'
 
@@ -93,7 +93,7 @@ class Build(Resource):
 	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/build/attributes'
 
 
-class BuildBetaDetails(Resource):
+class BuildBetaDetail(Resource):
 	endpoint = '/v1/buildBetaDetails'
 	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/buildBetaDetail/attributes'
 
