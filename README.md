@@ -39,8 +39,12 @@ apps = api.list_apps(filters={'sku': 'DINORUSH', 'name': 'Dino Rush'})
 print("%d apps found" % len(apps))
 
 # read app information
-app_info = api.read_app_information('1308363336')
-print(app_info.name, app_info.sku, app_info.bundleId)
+app = api.read_app_information('1308363336')
+print(app.name, app.sku, app.bundleId)
+
+# get a related resource
+for group in app.betaGroups():
+    print(group.name)
 
 # download sales report
 api.download_sales_and_trends_reports(
@@ -58,8 +62,10 @@ TODO
 
 * [ ] handle POST, DELETE and PATCH requests
 * [X] sales report
+* [X] handle related resources
 * [ ] allow to sort resources
-* [ ] Proper API documentation
+* [ ] proper API documentation
+* [ ] add tests
 * [ ] handle the new "Provisioning" section
 
 

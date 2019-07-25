@@ -45,13 +45,13 @@ class Api:
 	def _get_resource(self, Resource, resource_id):
 		url = "%s%s/%s" % (BASE_API, Resource.endpoint, resource_id)
 		payload = self._api_call(url)
-		return Resource(payload.get('data', {}))
-
-	def _get_related_resource(self, Resource, fullUrl):
-		payload = self._api_call(fullUrl)
 		return Resource(payload.get('data', {}), self)
 
-	def _get_resources(self, Resource, filters=None, fullUrl=None):
+	def _get_related_resource(self, Resource, full_url):
+		payload = self._api_call(full_url)
+		return Resource(payload.get('data', {}), self)
+
+	def _get_resources(self, Resource, filters=None, full_url=None):
 		class IterResource:
 			def __init__(self, api, url):
 				self.api = api
@@ -93,7 +93,7 @@ class Api:
 				self.payload = self.api._api_call(self.url)
 				self.total_length = self.payload.get('meta', {}).get('paging', {}).get('total', 0)
 
-		url = fullUrl if fullUrl else "%s%s" % (BASE_API, Resource.endpoint)
+		url = full_url if full_url else "%s%s" % (BASE_API, Resource.endpoint)
 		url = self._build_filters(url, filters)
 		return IterResource(self, url)
 

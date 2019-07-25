@@ -24,9 +24,9 @@ class Resource(ABC):
 				url = self._data.get('relationships', {})[item]['links']['related']
 				# List of resources
 				if is_resources:
-					return self._api._get_resources(item_cls, fullUrl=url)
+					return self._api._get_resources(item_cls, full_url=url)
 				else:
-					return self._api._get_related_resource(item_cls, fullUrl=url)
+					return self._api._get_related_resource(item_cls, full_url=url)
 			return callable
 
 		raise AttributeError('%s have no attributes %s' % (self.type_name, item))
