@@ -8,7 +8,7 @@ from setuptools import find_packages, setup
 
 NAME = 'appstoreconnect'
 DESCRIPTION = 'A Python wrapper around Apple App Store Api'
-URL = 'https://github.com/ponytech/appstoreconnectapi'
+URL = 'https://ponytech.net/projects/app-store-connect'
 EMAIL = 'contact@ponytech.net'
 AUTHOR = 'Ponytech'
 REQUIRES_PYTHON = '>=3.6.0'
