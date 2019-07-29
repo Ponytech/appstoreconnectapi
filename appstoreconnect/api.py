@@ -47,7 +47,11 @@ class Api:
 		payload = self._api_call(url)
 		return Resource(payload.get('data', {}))
 
-	def _get_resources(self, Resource, filters=None):
+	def _get_related_resource(self, Resource, fullUrl):
+		payload = self._api_call(fullUrl)
+		return Resource(payload.get('data', {}), self)
+
+	def _get_resources(self, Resource, filters=None, fullUrl=None):
 		class IterResource:
 			def __init__(self, api, url):
 				self.api = api
@@ -70,25 +74,26 @@ class Api:
 			def __next__(self):
 				if not self.payload:
 					self.fetch_page()
-
-				data = self.payload.get('data', [])[self.index]
-				self.index += 1
-				if self.index == len(self.payload.get('data', [])):
+				if self.index < len(self.payload.get('data', [])):
+					data = self.payload.get('data', [])[self.index]
+					self.index += 1
+					return Resource(data, self.api)
+				else:
 					self.url = self.payload.get('links', {}).get('next', None)
 					self.index = 0
 					if self.url:
 						self.fetch_page()
-					else:
-						raise StopIteration()
-
-				resource = Resource(data)
-				return resource
+						if self.index < len(self.payload.get('data', [])):
+							data = self.payload.get('data', [])[self.index]
+							self.index += 1
+							return Resource(data, self.api)
+					raise StopIteration()
 
 			def fetch_page(self):
 				self.payload = self.api._api_call(self.url)
 				self.total_length = self.payload.get('meta', {}).get('paging', {}).get('total', 0)
 
-		url = "%s%s" % (BASE_API, Resource.endpoint)
+		url = fullUrl if fullUrl else "%s%s" % (BASE_API, Resource.endpoint)
 		url = self._build_filters(url, filters)
 		return IterResource(self, url)
 
@@ -177,15 +182,18 @@ class Api:
 	# TODO: implement POST requests using Resource
 	def create_beta_tester(self, beta_group_id, email, first_name, last_name):
 		post_data = {'data': {'attributes': {'email': email, 'firstName': first_name, 'lastName': last_name}, 'relationships': {'betaGroups': {'data': [{ 'id': beta_group_id ,'type': 'betaGroups'}]}}, 'type': 'betaTesters'}}
-		return self._api_call("/v1/betaTesters", HttpMethod.POST, post_data)
+		payload = self._api_call("/v1/betaTesters", HttpMethod.POST, post_data)
+		return BetaTester(payload.get('data', {}))
 
 	def create_beta_group(self, group_name, app_id):
 		post_data = {'data': {'attributes': {'name': group_name}, 'relationships': {'app': {'data': {'id': app_id, 'type': 'apps'}}}, 'type': 'betaGroups'}}
-		return self._api_call(BASE_API + "/v1/betaGroups", HttpMethod.POST, post_data)
+		payload = self._api_call(BASE_API + "/v1/betaGroups", HttpMethod.POST, post_data)
+		return BetaGroup(payload.get('data'), {})
 
 	def add_build_to_beta_group(self, beta_group_id, build_id):
 		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
-		return self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
+		payload = self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
+		return BetaGroup(payload.get('data'), {})
 
 	# App Resources
 	def read_app_information(self, app_ip):
@@ -206,16 +214,16 @@ class Api:
 	def list_prerelease_versions(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
-		:return: an iterator over PreReleaseVersions resources
+		:return: an iterator over PreReleaseVersion resources
 		"""
-		return self._get_resources(PreReleaseVersions, filters)
+		return self._get_resources(PreReleaseVersion, filters)
 
 	def list_beta_app_localizations(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_app_localizations
-		:return: an iterator over BetaAppLocalizations resources
+		:return: an iterator over BetaAppLocalization resources
 		"""
-		return self._get_resources(BetaAppLocalizations, filters)
+		return self._get_resources(BetaAppLocalization, filters)
 
 	def list_app_encryption_declarations(self, filters=None):
 		"""
@@ -246,24 +254,27 @@ class Api:
 	# TODO: implement POST requests using Resource
 	def set_uses_non_encryption_exemption_setting(self, build_id, uses_non_encryption_exemption_setting):
 		post_data = {'data': {'attributes': {'usesNonExemptEncryption': uses_non_encryption_exemption_setting}, 'id': build_id, 'type': 'builds'}}
-		return self._api_call(BASE_API + "/v1/builds/" + build_id, HttpMethod.PATCH, post_data)
+		payload = self._api_call(BASE_API + "/v1/builds/" + build_id, HttpMethod.PATCH, post_data)
+		return Build(payload.get('data'), {})
 
 	def list_build_beta_details(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_build_beta_details
-		:return: an iterator over BuildBetaDetails resources
+		:return: an iterator over BuildBetaDetail resources
 		"""
-		return self._get_resources(BuildBetaDetails, filters)
+		return self._get_resources(BuildBetaDetail, filters)
 
 	# TODO: handle relationships on get_resources()
 	def create_beta_build_localization(self, build_id, locale, whatsNew):
 		post_data = {'data': { 'type': 'betaBuildLocalizations', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}, 'attributes': { 'locale': locale, 'whatsNew': whatsNew}}}
-		return self._api_call(BASE_API +  "/v1/betaBuildLocalizations", HttpMethod.POST, post_data)
+		payload = self._api_call(BASE_API +  "/v1/betaBuildLocalizations", HttpMethod.POST, post_data)
+		return BetaBuildLocalization(payload.get('data'), {})
 
 	# TODO: implement POST requests using Resource
 	def modify_beta_build_localization(self, beta_build_localization_id, whatsNew):
 		post_data = {'data': { 'type': 'betaBuildLocalizations', 'id': beta_build_localization_id, 'attributes': {'whatsNew': whatsNew}}}
-		return self._api_call(BASE_API +  "/v1/betaBuildLocalizations/" + beta_build_localization_id, HttpMethod.PATCH, post_data)
+		payload = self._api_call(BASE_API +  "/v1/betaBuildLocalizations/" + beta_build_localization_id, HttpMethod.PATCH, post_data)
+		return BetaAppLocalization(payload.get('data'), {})
 
 	def list_beta_build_localizations(self, filters=None):
 		"""
@@ -289,7 +300,8 @@ class Api:
 	# TODO: implement these function using Resource
 	def submit_app_for_beta_review(self, build_id):
 		post_data = {'data': { 'type': 'betaAppReviewSubmissions', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}}}
-		return self._api_call(BASE_API + "/v1/betaAppReviewSubmissions", HttpMethod.POST, post_data)
+		payload = self._api_call(BASE_API + "/v1/betaAppReviewSubmissions", HttpMethod.POST, post_data)
+		return BetaAppReviewSubmission(payload.get('data'), {})
 
 	# Reporting
 	def download_finance_reports(self, filters=None, save_to=None):
