@@ -51,7 +51,7 @@ class Api:
 		payload = self._api_call(full_url)
 		return Resource(payload.get('data', {}), self)
 
-	def _get_resources(self, Resource, filters=None, full_url=None):
+	def _get_resources(self, Resource, filters=None, sort=None, full_url=None):
 		class IterResource:
 			def __init__(self, api, url):
 				self.api = api
@@ -94,15 +94,18 @@ class Api:
 				self.total_length = self.payload.get('meta', {}).get('paging', {}).get('total', 0)
 
 		url = full_url if full_url else "%s%s" % (BASE_API, Resource.endpoint)
-		url = self._build_filters(url, filters)
+		url = self._build_query_parameters(url, filters, sort)
 		return IterResource(self, url)
 
-	def _build_filters(self, url, filters):
+	def _build_query_parameters(self, url, filters, sort):
+		separator = '?'
 		if type(filters) is dict:
 			for index, (filter_name, filter_value) in enumerate(filters.items()):
-				separator = '?' if index == 0 else '&'
 				filter_name = "filter[%s]" % filter_name
 				url = "%s%s%s=%s" % (url, separator, filter_name, filter_value)
+				separator = '&'
+		if type(sort) is str:
+			url = "%s%ssort=%s" % (url, separator, sort)
 		return url
 
 	def _api_call(self, url, method=HttpMethod.GET, post_data=None):
@@ -150,34 +153,34 @@ class Api:
 		return self._token
 
 	# Users and Roles
-	def list_users(self, filters=None):
+	def list_users(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_users
 		:return: an iterator over User resources
 		"""
-		return self._get_resources(User, filters)
+		return self._get_resources(User, filters, sort)
 
-	def list_invited_users(self, filters=None):
+	def list_invited_users(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_invited_users
 		:return: an iterator over UserInvitation resources
 		"""
-		return self._get_resources(UserInvitation, filters)
+		return self._get_resources(UserInvitation, filters, sort)
 
 	# Beta Testers and Groups
-	def list_beta_testers(self, filters=None):
+	def list_beta_testers(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_testers
-		:return: an iterator over BetaTester resources
+		:return: an iterator over BetaTester resourcwes
 		"""
-		return self._get_resources(BetaTester, filters)
+		return self._get_resources(BetaTester, filters, sort)
 
-	def list_beta_groups(self, filters=None):
+	def list_beta_groups(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_groups
 		:return: an iterator over BetaGroup resources
 		"""
-		return self._get_resources(BetaGroup, filters)
+		return self._get_resources(BetaGroup, filters, sort)
 
 	# TODO: implement POST requests using Resource
 	def create_beta_tester(self, beta_group_id, email, first_name, last_name):
@@ -204,19 +207,19 @@ class Api:
 		"""
 		return self._get_resource(App, app_ip)
 
-	def list_apps(self, filters=None):
+	def list_apps(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_apps
 		:return: an iterator over App resources
 		"""
-		return self._get_resources(App, filters)
+		return self._get_resources(App, filters, sort)
 
-	def list_prerelease_versions(self, filters=None):
+	def list_prerelease_versions(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_prerelease_versions
 		:return: an iterator over PreReleaseVersion resources
 		"""
-		return self._get_resources(PreReleaseVersion, filters)
+		return self._get_resources(PreReleaseVersion, filters, sort)
 
 	def list_beta_app_localizations(self, filters=None):
 		"""
@@ -240,12 +243,12 @@ class Api:
 		return self._get_resources(BetaLicenseAgreement, filters)
 
 	# Build Resources
-	def list_builds(self, filters=None):
+	def list_builds(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_builds
 		:return: an iterator over Build resources
 		"""
-		return self._get_resources(Build, filters)
+		return self._get_resources(Build, filters, sort)
 
 	# TODO: handle fields on get_resources()
 	def build_processing_state(self, app_id, version):
@@ -316,7 +319,7 @@ class Api:
 				filters[required_key] = default_value
 
 		url = "%s%s" % (BASE_API, FinanceReport.endpoint)
-		url = self._build_filters(url, filters)
+		url = self._build_query_parameters(url, filters)
 		response = self._api_call(url)
 
 		if save_to:
@@ -337,7 +340,7 @@ class Api:
 				filters[required_key] = default_value
 
 		url = "%s%s" % (BASE_API, SalesReport.endpoint)
-		url = self._build_filters(url, filters)
+		url = self._build_query_parameters(url, filters)
 		response = self._api_call(url)
 
 		if save_to:

@@ -34,6 +34,9 @@ apps = api.list_apps()
 for app in apps:
     print(app.name, app.sku)
 
+# sort resources
+apps = api.list_apps(sort='name')
+
 # filter apps
 apps = api.list_apps(filters={'sku': 'DINORUSH', 'name': 'Dino Rush'})
 print("%d apps found" % len(apps))
@@ -63,7 +66,7 @@ TODO
 * [ ] handle POST, DELETE and PATCH requests
 * [X] sales report
 * [X] handle related resources
-* [ ] allow to sort resources
+* [X] allow to sort resources
 * [ ] proper API documentation
 * [ ] add tests
 * [ ] handle the new "Provisioning" section
