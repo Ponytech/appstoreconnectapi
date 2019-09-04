@@ -100,7 +100,7 @@ class Api:
 		url = self._build_query_parameters(url, filters, sort)
 		return IterResource(self, url)
 
-	def _build_query_parameters(self, url, filters, sort):
+	def _build_query_parameters(self, url, filters, sort = None):
 		separator = '?'
 		if type(filters) is dict:
 			for index, (filter_name, filter_value) in enumerate(filters.items()):
