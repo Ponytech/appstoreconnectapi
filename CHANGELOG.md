@@ -1,3 +1,12 @@
+## 0.4.1
+
+Features:
+ - Allow to query resources sorted
+ - Allow passing key as a string value (@kpotehin)
+
+Bugfixes:
+ - Fixed sort param in reports (@kpotehin)
+
 ## 0.4.0
 
 Features:
