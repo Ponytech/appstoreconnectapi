@@ -19,7 +19,7 @@ Usage
 
 Please follow instructions on [Apple documentation](https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api) on how to generate an API key.
 
-With your *key ID*, *key file* and *issuer ID* create a new API instance:
+With your *key ID*, *key file* (you can either pass the path to the file or the content of it as a string) and *issuer ID* create a new API instance:
 
 ```python
 from appstoreconnect import Api

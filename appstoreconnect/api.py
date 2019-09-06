@@ -36,7 +36,10 @@ class Api:
 		token = self.token  # generate first token
 
 	def _generate_token(self):
-		key = open(self.key_file, 'r').read()
+		try:
+			key = open(self.key_file, 'r').read()
+		except IOError as e:
+			key = self.key_file
 		self.token_gen_date = datetime.now()
 		exp = int(time.mktime((self.token_gen_date + timedelta(minutes=20)).timetuple()))
 		return jwt.encode({'iss': self.issuer_id, 'exp': exp, 'aud': 'appstoreconnect-v1'}, key,
@@ -97,7 +100,7 @@ class Api:
 		url = self._build_query_parameters(url, filters, sort)
 		return IterResource(self, url)
 
-	def _build_query_parameters(self, url, filters, sort):
+	def _build_query_parameters(self, url, filters, sort = None):
 		separator = '?'
 		if type(filters) is dict:
 			for index, (filter_name, filter_value) in enumerate(filters.items()):
