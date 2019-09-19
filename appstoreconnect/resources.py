@@ -125,6 +125,13 @@ class UserInvitation(Resource):
 	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/userinvitation/attributes'
 
 
+# Provisioning
+
+class Devices(Resource):
+	endpoint = '/v1/devices'
+	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/device/attributes'
+
+
 # Reporting
 
 class FinanceReport(Resource):
@@ -135,5 +142,3 @@ class FinanceReport(Resource):
 class SalesReport(Resource):
 	endpoint = '/v1/salesReports'
 	filters = 'https://developer.apple.com/documentation/appstoreconnectapi/download_sales_and_trends_reports'
-
-
