@@ -128,7 +128,7 @@ class Api:
 
 		content_type = r.headers['content-type']
 
-		if content_type == "application/json" or content_type == "application/vnd.api+json":
+		if content_type in [ "application/json", "application/vnd.api+json" ]:
 			payload = r.json()
 			if 'errors' in payload:
 				raise APIError(payload.get('errors', [])[0].get('detail', 'Unknown error'))
