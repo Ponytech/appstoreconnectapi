@@ -128,7 +128,7 @@ class Api:
 
 		content_type = r.headers['content-type']
 
-		if content_type == "application/json":
+		if content_type in [ "application/json", "application/vnd.api+json" ]:
 			payload = r.json()
 			if 'errors' in payload:
 				raise APIError(payload.get('errors', [])[0].get('detail', 'Unknown error'))
@@ -308,6 +308,14 @@ class Api:
 		post_data = {'data': { 'type': 'betaAppReviewSubmissions', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}}}
 		payload = self._api_call(BASE_API + "/v1/betaAppReviewSubmissions", HttpMethod.POST, post_data)
 		return BetaAppReviewSubmission(payload.get('data'), {})
+
+	# Provisioning
+	def list_devices(self, filters=None, sort=None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_devices
+		:return: an iterator over Device resources
+		"""
+		return self._get_resources(Devices, filters, sort)
 
 	# Reporting
 	def download_finance_reports(self, filters=None, save_to=None):
