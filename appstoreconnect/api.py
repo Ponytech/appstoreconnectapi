@@ -310,12 +310,33 @@ class Api:
 		return BetaAppReviewSubmission(payload.get('data'), {})
 
 	# Provisioning
+	def list_bundle_ids(self, filters=None, sort=None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_bundle_ids
+		:return: an iterator over BundleId resources
+		"""
+		return self._get_resources(BundleId, filters, sort)
+
+	def list_certificates(self, filters=None, sort=None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_certificates
+		:return: an iterator over Certificate resources
+		"""
+		return self._get_resources(Certificate, filters, sort)
+
 	def list_devices(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_devices
 		:return: an iterator over Device resources
 		"""
-		return self._get_resources(Devices, filters, sort)
+		return self._get_resources(Device, filters, sort)
+
+	def list_profiles(self, filters=None, sort=None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_profiles
+		:return: an iterator over Profile resources
+		"""
+		return self._get_resources(Profile, filters, sort)
 
 	# Reporting
 	def download_finance_reports(self, filters=None, save_to=None):

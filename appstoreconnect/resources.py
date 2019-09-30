@@ -126,10 +126,24 @@ class UserInvitation(Resource):
 
 
 # Provisioning
+class BundleId(Resource):
+	endpoint = '/v1/bundleIds'
+	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/bundleid/attributes'
 
-class Devices(Resource):
+
+class Certificate(Resource):
+	endpoint = '/v1/certificates'
+	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/certificate/attributes'
+
+
+class Device(Resource):
 	endpoint = '/v1/devices'
 	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/device/attributes'
+
+
+class Profile(Resource):
+	endpoint = '/v1/profiles'
+	attributes = 'https://developer.apple.com/documentation/appstoreconnectapi/profile/attributes'
 
 
 # Reporting

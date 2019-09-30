@@ -49,6 +49,14 @@ print(app.name, app.sku, app.bundleId)
 for group in app.betaGroups():
     print(group.name)
 
+# list bundle ids
+for bundle_id in api.list_bundle_ids():
+    print(bundle_id.identifier)
+
+# list certificates
+for certificate in api.list_certificates():
+    print(certificate.name)
+
 # download sales report
 api.download_sales_and_trends_reports(
     filters={'vendorNumber': '123456789', 'frequency': 'WEEKLY', 'reportDate': '2019-06-09'}, save_to='report.csv')
@@ -58,6 +66,11 @@ api.download_finance_reports(filters={'vendorNumber': '123456789', 'reportDate':
 ```
 
 Please note this is a work in progress, API is subject to change between versions.
+
+Development
+-----------
+
+Project development happens on [Github](https://github.com/Ponytech/appstoreconnectapi) 
 
 
 TODO
@@ -69,7 +82,7 @@ TODO
 * [X] allow to sort resources
 * [ ] proper API documentation
 * [ ] add tests
-* [ ] handle the new "Provisioning" section
+* [X] handle the new "Provisioning" section
 
 
 Credits
