@@ -1,3 +1,7 @@
+## 0.5.0
+Features:
+ -  Handle listing all resources in the provisioning section (devices thanks to @EricG-Personal)
+
 ## 0.4.1
 
 Features:
