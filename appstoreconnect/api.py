@@ -1,3 +1,5 @@
+from typing import Union
+
 import requests
 import jwt
 import gzip
@@ -17,6 +19,7 @@ class HttpMethod(Enum):
 	GET = 1
 	POST = 2
 	PATCH = 3
+	DELETE = 4
 
 
 class APIError(Exception):
@@ -53,6 +56,70 @@ class Api:
 	def _get_related_resource(self, Resource, full_url):
 		payload = self._api_call(full_url)
 		return Resource(payload.get('data', {}), self)
+
+	def _create_resource(self, Resource, args):
+		attributes = {}
+		for attribute in Resource.attributes:
+			if attribute in args and args[attribute] is not None:
+				attributes[attribute] = args[attribute]
+
+		relationships_dict = {}
+		for relation in Resource.relationships.keys():
+			if relation in args and args[relation] is not None:
+				relationships_dict[relation] = {}
+				if Resource.relationships[relation].get('multiple', False):
+					relationships_dict[relation]['data'] = []
+					relationship_objects = args[relation]
+					if type(relationship_objects) is not list:
+						relationship_objects = [relationship_objects]
+					for relationship_object in relationship_objects:
+						relationships_dict[relation]['data'].append({
+							'id': relationship_object.id,
+							'type': relationship_object.type
+						})
+				else:
+					relationships_dict[relation]['data'] = {
+							'id': args[relation].id,
+							'type': args[relation].type
+						}
+
+		post_data = {
+			'data': {
+				'attributes': attributes,
+				'relationships': relationships_dict,
+				'type': Resource.type
+			}
+		}
+		url = "%s%s" % (BASE_API, Resource.endpoint)
+		if self._debug:
+			print(post_data)
+		payload = self._api_call(url, HttpMethod.POST, post_data)
+
+		return Resource(payload.get('data', {}), self)
+
+	def _modify_resource(self, resource, args):
+		attributes = {}
+		for attribute in resource.attributes:
+			if attribute in args and args[attribute] is not None:
+				attributes[attribute] = args[attribute]
+
+		post_data = {
+			'data': {
+				'attributes': attributes,
+				'id': resource.id,
+				'type': resource.type
+			}
+		}
+		url = "%s%s/%s" % (BASE_API, resource.endpoint, resource.id)
+		if self._debug:
+			print(post_data)
+		payload = self._api_call(url, HttpMethod.PATCH, post_data)
+
+		return type(resource)(payload.get('data', {}), self)
+
+	def _delete_resource(self, resource: Resource):
+		url = "%s%s/%s" % (BASE_API, resource.endpoint, resource.id)
+		self._api_call(url, HttpMethod.DELETE)
 
 	def _get_resources(self, Resource, filters=None, sort=None, full_url=None):
 		class IterResource:
@@ -115,7 +182,6 @@ class Api:
 		headers = {"Authorization": "Bearer %s" % self.token}
 		if self._debug:
 			print(url)
-		r = {}
 
 		if method == HttpMethod.GET:
 			r = requests.get(url, headers=headers)
@@ -125,6 +191,10 @@ class Api:
 		elif method == HttpMethod.PATCH:
 			headers["Content-Type"] = "application/json"
 			r = requests.patch(url=url, headers=headers, data=json.dumps(post_data))
+		elif method == HttpMethod.DELETE:
+			r = requests.delete(url=url, headers=headers)
+		else:
+			raise APIError("Unknown HTTP method")
 
 		content_type = r.headers['content-type']
 
@@ -183,21 +253,58 @@ class Api:
 		payload = self._api_call(BASE_API + "/v1/userInvitations", HttpMethod.POST, post_data)
 		return UserInvitation(payload.get('data'), {})
 
-	def read_user_invitation_information(self, user_invitation_id):
+	def read_user_invitation_information(self, user_invitation_id: str):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_user_invitation_information
 		:return: a UserInvitation resource
 		"""
-		payload = self._api_call(BASE_API + "/v1/userInvitations/" + user_invitation_id)
-		return UserInvitation(payload.get('data'), {})
+		return self._get_resource(UserInvitation, user_invitation_id)
 
 	# Beta Testers and Groups
+	def create_beta_tester(self, email: str, firstName: str = None, lastName: str = None, betaGroups: BetaGroup = None, builds: Build = None) -> BetaTester:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_tester
+		:return: an BetaTester resource
+		"""
+		return self._create_resource(BetaTester, locals())
+
+	def delete_beta_tester(self, betaTester: BetaTester) -> None:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_a_beta_tester
+		:return: None
+		"""
+		return self._delete_resource(betaTester)
+
 	def list_beta_testers(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_testers
-		:return: an iterator over BetaTester resourcwes
+		:return: an iterator over BetaTester resources
 		"""
 		return self._get_resources(BetaTester, filters, sort)
+
+	def read_beta_tester_information(self, beta_tester_id: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_beta_tester_information
+		:return: a BetaTester resource
+		"""
+		return self._get_resource(BetaTester, beta_tester_id)
+
+	def create_beta_group(self, app: App, name: str, publicLinkEnabled: bool = None, publicLinkLimit: int = None, publicLinkLimitEnabled: bool = None) -> BetaGroup:
+		"""
+		:reference:https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_group
+		:return: a BetaGroup resource
+		"""
+		return self._create_resource(BetaGroup, locals())
+
+	def modify_beta_group(self, betaGroup: BetaGroup, name: str = None, publicLinkEnabled: bool = None, publicLinkLimit: int = None, publicLinkLimitEnabled: bool = None) -> BetaGroup:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_group
+		:return: a BetaGroup resource
+		"""
+		return self._modify_resource(betaGroup, locals())
+
+	def delete_beta_group(self, betaGroup: BetaGroup):
+		return self._delete_resource(betaGroup)
 
 	def list_beta_groups(self, filters=None, sort=None):
 		"""
@@ -206,16 +313,12 @@ class Api:
 		"""
 		return self._get_resources(BetaGroup, filters, sort)
 
-	# TODO: implement POST requests using Resource
-	def create_beta_tester(self, beta_group_id, email, first_name, last_name):
-		post_data = {'data': {'attributes': {'email': email, 'firstName': first_name, 'lastName': last_name}, 'relationships': {'betaGroups': {'data': [{ 'id': beta_group_id ,'type': 'betaGroups'}]}}, 'type': 'betaTesters'}}
-		payload = self._api_call(BASE_API + "/v1/betaTesters", HttpMethod.POST, post_data)
-		return BetaTester(payload.get('data', {}))
-
-	def create_beta_group(self, group_name, app_id):
-		post_data = {'data': {'attributes': {'name': group_name}, 'relationships': {'app': {'data': {'id': app_id, 'type': 'apps'}}}, 'type': 'betaGroups'}}
-		payload = self._api_call(BASE_API + "/v1/betaGroups", HttpMethod.POST, post_data)
-		return BetaGroup(payload.get('data'), {})
+	def read_beta_group_information(self, beta_group_ip):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_beta_group_information
+		:return: an BetaGroup resource
+		"""
+		return self._get_resource(BetaGroup, beta_group_ip)
 
 	def add_build_to_beta_group(self, beta_group_id, build_id):
 		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
@@ -251,6 +354,20 @@ class Api:
 		:return: an iterator over BetaAppLocalization resources
 		"""
 		return self._get_resources(BetaAppLocalization, filters)
+
+	def read_beta_app_localization_information(self, beta_app_id: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_beta_app_localization_information
+		:return: an BetaAppLocalization resource
+		"""
+		return self._get_resource(BetaAppLocalization, beta_app_id)
+
+	def create_beta_app_localization(self, app: App, locale: str, description: str = None, feedbackEmail: str = None, marketingUrl: str = None, privacyPolicyUrl: str = None, tvOsPrivacyPolicy: str = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_app_localization
+		:return: an BetaAppLocalization resource
+		"""
+		return self._create_resource(BetaAppLocalization, locals())
 
 	def list_app_encryption_declarations(self, filters=None):
 		"""
@@ -291,17 +408,19 @@ class Api:
 		"""
 		return self._get_resources(BuildBetaDetail, filters)
 
-	# TODO: handle relationships on get_resources()
-	def create_beta_build_localization(self, build_id, locale, whatsNew):
-		post_data = {'data': { 'type': 'betaBuildLocalizations', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}, 'attributes': { 'locale': locale, 'whatsNew': whatsNew}}}
-		payload = self._api_call(BASE_API +  "/v1/betaBuildLocalizations", HttpMethod.POST, post_data)
-		return BetaBuildLocalization(payload.get('data'), {})
+	def create_beta_build_localization(self, build: Build, locale: str, whatsNew: str = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_a_beta_build_localization
+		:return: a BetaBuildLocalization resource
+		"""
+		return self._create_resource(BetaBuildLocalization, locals())
 
-	# TODO: implement POST requests using Resource
-	def modify_beta_build_localization(self, beta_build_localization_id, whatsNew):
-		post_data = {'data': { 'type': 'betaBuildLocalizations', 'id': beta_build_localization_id, 'attributes': {'whatsNew': whatsNew}}}
-		payload = self._api_call(BASE_API +  "/v1/betaBuildLocalizations/" + beta_build_localization_id, HttpMethod.PATCH, post_data)
-		return BetaAppLocalization(payload.get('data'), {})
+	def modify_beta_build_localization(self, beta_build_localization: BetaBuildLocalization, whatsNew: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_build_localization
+		:return: a BetaBuildLocalization resource
+		"""
+		return self._modify_resource(beta_build_localization, locals())
 
 	def list_beta_build_localizations(self, filters=None):
 		"""
@@ -352,15 +471,19 @@ class Api:
 		"""
 		return self._get_resources(Device, filters, sort)
 
-	# TODO: implement POST requests using Resource
-	def register_device(self, name, platform, udid):
+	def register_new_device(self, name: str, platform: str, udid: str) -> Device:
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/register_a_new_device
 		:return: a Device resource
 		"""
-		post_data = {'data': {'attributes': {'name': name, 'platform': platform, 'udid': udid}, 'type': 'devices'}}
-		payload = self._api_call(BASE_API + "/v1/devices", HttpMethod.POST, post_data)
-		return Device(payload.get('data'), {})
+		return self._create_resource(Device, locals())
+
+	def modify_registered_device(self, device: Device, name: str = None, status: str = None) -> Device:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_registered_device
+		:return: a Device resource
+		"""
+		return self._modify_resource(device, locals())
 
 	def list_profiles(self, filters=None, sort=None):
 		"""
