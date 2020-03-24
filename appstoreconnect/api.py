@@ -170,6 +170,27 @@ class Api:
 		"""
 		return self._get_resources(UserInvitation, filters, sort)
 
+	# TODO: implement POST requests using Resource
+	def invite_user(self, all_apps_visible, email, first_name, last_name, provisioning_allowed, roles, visible_apps=None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/invite_a_user
+		:return: a UserInvitation resource
+		"""
+		post_data = {'data': {'attributes': {'allAppsVisible': all_apps_visible, 'email': email, 'firstName': first_name, 'lastName': last_name, 'provisioningAllowed': provisioning_allowed, 'roles': roles}, 'type': 'userInvitations'}}
+		if visible_apps is not None:
+			post_data['data']['relationships'] = {'visibleApps': list(map(lambda a: {'id': a, 'type': 'apps'}, visible_apps))}
+			post_data['data']['relationships'] = {'visibleApps': visible_apps_relationship}
+		payload = self._api_call(BASE_API + "/v1/userInvitations", HttpMethod.POST, post_data)
+		return UserInvitation(payload.get('data'), {})
+
+	def read_user_invitation_information(self, user_invitation_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_user_invitation_information
+		:return: a UserInvitation resource
+		"""
+		payload = self._api_call(BASE_API + "/v1/userInvitations/" + user_invitation_id)
+		return UserInvitation(payload.get('data'), {})
+
 	# Beta Testers and Groups
 	def list_beta_testers(self, filters=None, sort=None):
 		"""
