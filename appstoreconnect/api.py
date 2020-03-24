@@ -209,7 +209,7 @@ class Api:
 	# TODO: implement POST requests using Resource
 	def create_beta_tester(self, beta_group_id, email, first_name, last_name):
 		post_data = {'data': {'attributes': {'email': email, 'firstName': first_name, 'lastName': last_name}, 'relationships': {'betaGroups': {'data': [{ 'id': beta_group_id ,'type': 'betaGroups'}]}}, 'type': 'betaTesters'}}
-		payload = self._api_call("/v1/betaTesters", HttpMethod.POST, post_data)
+		payload = self._api_call(BASE_API + "/v1/betaTesters", HttpMethod.POST, post_data)
 		return BetaTester(payload.get('data', {}))
 
 	def create_beta_group(self, group_name, app_id):
