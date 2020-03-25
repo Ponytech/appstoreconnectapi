@@ -1,3 +1,11 @@
+## 0.6.0
+
+Features:
+ - New endpoints: invite_user and read_user_invitation_information (@BalestraPatrick)
+
+Bugfixes:
+ - Fixes create_beta_tester endpoint URL (@BalestraPatrick)
+
 ## 0.5.1
 
 Bugfixes:
