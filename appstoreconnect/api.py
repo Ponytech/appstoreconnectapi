@@ -352,6 +352,16 @@ class Api:
 		"""
 		return self._get_resources(Device, filters, sort)
 
+	# TODO: implement POST requests using Resource
+	def register_device(self, name, platform, udid):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/register_a_new_device
+		:return: a Device resource
+		"""
+		post_data = {'data': {'attributes': {'name': name, 'platform': platform, 'udid': udid}, 'type': 'devices'}}
+		payload = self._api_call(BASE_API + "/v1/devices", HttpMethod.POST, post_data)
+		return Device(payload.get('data'), {})
+
 	def list_profiles(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_profiles
