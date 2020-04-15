@@ -1,3 +1,8 @@
+## 0.7.0
+
+Features:
+ - New endpoint: register_device (@BalestraPatrick)
+
 ## 0.6.0
 
 Features:
