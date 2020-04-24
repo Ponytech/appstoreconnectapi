@@ -1,3 +1,21 @@
+## 0.8.0
+
+Features:
+ - New endpoints:
+   - delete_beta_tester
+   - read_beta_tester_information
+   - modify_beta_group
+   - delete_beta_group
+   - read_beta_group_information
+   - read_beta_app_localization_information
+   - create_beta_app_localization
+   - modify_registered_device
+
+Breaking changes API:
+ - new parameters for create_beta_tester
+ - new parameters for create_beta_group
+ - register_device renamed to register_new_device 
+
 ## 0.7.0
 
 Features:
