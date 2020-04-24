@@ -78,6 +78,7 @@ class Api:
 
 	def create_beta_group(self, group_name, app_id):
 		post_data = {'data': {'attributes': {'name': group_name}, 'relationships': {'app': {'data': {'id': app_id, 'type': 'apps'}}}, 'type': 'betaGroups'}}
+		print(json.dumps(post_data))
 
 		return self._api_call("/v1/betaGroups", HttpMethod.POST, post_data)
 
