@@ -78,6 +78,7 @@ class Api:
 
 	def create_beta_group(self, group_name, app_id):
 		post_data = {'data': {'attributes': {'name': group_name}, 'relationships': {'app': {'data': {'id': app_id, 'type': 'apps'}}}, 'type': 'betaGroups'}}
+		print(json.dumps(post_data))
 
 		return self._api_call("/v1/betaGroups", HttpMethod.POST, post_data)
 
@@ -102,16 +103,27 @@ class Api:
 	def beta_group_beta_testers(self, beta_group_id):
 		return self._api_call("/v1/betaGroups/" + beta_group_id + "/betaTesters", HttpMethod.GET, None)
 
+	#prereleaseVersions
+
+	def prerelease_versions_id_for_app_and_version(self, app_id, version):
+		return self._api_call("/v1/preReleaseVersions?filter[app]=" + app_id + "&filter[version]=" + version, HttpMethod.GET, None)
+
 	#builds
+
+	def build_prerelease_version(self, build_id):
+		return self._api_call("/v1/builds/" + build_id + "/preReleaseVersion", HttpMethod.GET, None)
 
 	def builds(self):
 		return self._api_call("/v1/builds", HttpMethod.GET, None)
 
 	def builds_for_app(self, app_id):
-		return self._api_call("/v1/builds?filter[app]=" + app_id, HttpMethod.GET, None)
+		return self._api_call("/v1/builds?include=preReleaseVersion&filter[app]=" + app_id, HttpMethod.GET, None)
 
-	def build_processing_state(self, app_id, version):
-		return self._api_call("/v1/builds?filter[app]=" + app_id + "&filter[version]=" + version + "&fields[builds]=processingState", HttpMethod.GET, None)
+	def builds_for_app_and_version_and_prerelease_version(self, app_id, version, prerelease_version):
+		return self._api_call("/v1/builds?filter[app]=" + app_id + "&filter[version]=" + version + "&filter[preReleaseVersion]=" + prerelease_version, HttpMethod.GET, None)
+
+	def build_processing_state(self, app_id, build_id):
+		return self._api_call("/v1/builds?filter[app]=" + app_id + "&filter[id]=" + build_id + "&fields[builds]=processingState", HttpMethod.GET, None)
 
 	def set_uses_non_encryption_exemption_setting(self, build_id, uses_non_encryption_exemption_setting):
 		post_data = {'data': {'attributes': {'usesNonExemptEncryption': uses_non_encryption_exemption_setting}, 'id': build_id, 'type': 'builds'}}
