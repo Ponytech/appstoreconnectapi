@@ -10,6 +10,7 @@ Features:
    - read_beta_app_localization_information
    - create_beta_app_localization
    - modify_registered_device
+ - Collect anonymous usage statistics
 
 Breaking changes API:
  - new parameters for create_beta_tester

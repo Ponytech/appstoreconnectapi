@@ -1,6 +1,9 @@
 import requests
 import jwt
 import gzip
+import platform
+import hashlib
+from collections import defaultdict
 from pathlib import Path
 from datetime import datetime, timedelta
 import time
@@ -8,6 +11,7 @@ import json
 from enum import Enum
 
 from .resources import *
+from .__version__ import __version__ as version
 
 ALGORITHM = 'ES256'
 BASE_API = "https://api.appstoreconnect.apple.com"
@@ -26,15 +30,24 @@ class APIError(Exception):
 
 class Api:
 
-	def __init__(self, key_id, key_file, issuer_id):
+	def __init__(self, key_id, key_file, issuer_id, submit_stats=True):
 		self._token = None
 		self.token_gen_date = None
 		self.exp = None
 		self.key_id = key_id
 		self.key_file = key_file
 		self.issuer_id = issuer_id
+		self.submit_stats = submit_stats
+		self._call_stats = defaultdict(int)
+		if self.submit_stats:
+			self._submit_stats("session_start")
+
 		self._debug = False
 		token = self.token  # generate first token
+
+	def __del__(self):
+		if self.submit_stats:
+			self._submit_stats("session_end")
 
 	def _generate_token(self):
 		try:
@@ -181,6 +194,13 @@ class Api:
 		if self._debug:
 			print(url)
 
+		if self._submit_stats:
+			endpoint = url.replace(BASE_API, '')
+			if method in (HttpMethod.PATCH, HttpMethod.DELETE):  # remove last bit of endpoint which is a resource id
+				endpoint = "/".join(endpoint.split('/')[:-1])
+			request = "%s %s" % (method.name, endpoint)
+			self._call_stats[request] += 1
+
 		if method == HttpMethod.GET:
 			r = requests.get(url, headers=headers)
 		elif method == HttpMethod.POST:
@@ -214,6 +234,25 @@ class Api:
 			if not 200 <= r.status_code <= 299:
 				raise APIError("HTTP error [%d][%s]" % (r.status_code, r.content))
 			return r
+
+	def _submit_stats(self, event_type):
+		"""
+		this submits anonymous usage statistics to help us better understand how this library is used
+		you can opt-out by initializing the client with submit_stats=False
+		"""
+		payload = {
+			'project': 'appstoreconnectapi',
+			'version': version,
+			'type': event_type,
+			'parameters': {
+				'python_version': platform.python_version(),
+				'platform': platform.platform(),
+				'issuer_id_hash': hashlib.sha1(self.issuer_id.encode()).hexdigest(),  # send anonymized hash
+			}
+		}
+		if event_type == 'session_end':
+			payload['parameters']['endpoints'] = self._call_stats
+		requests.post('https://stats.ponytech.net/new-event', json.dumps(payload))
 
 	@property
 	def token(self):
