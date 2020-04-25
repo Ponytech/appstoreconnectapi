@@ -1,5 +1,3 @@
-from typing import Union
-
 import requests
 import jwt
 import gzip
