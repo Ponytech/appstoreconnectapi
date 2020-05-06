@@ -78,9 +78,13 @@ class Api:
 
 	def create_beta_group(self, group_name, app_id):
 		post_data = {'data': {'attributes': {'name': group_name}, 'relationships': {'app': {'data': {'id': app_id, 'type': 'apps'}}}, 'type': 'betaGroups'}}
-		print(json.dumps(post_data))
 
 		return self._api_call("/v1/betaGroups", HttpMethod.POST, post_data)
+
+	def activate_public_link_for_beta_group(self, beta_group_id):
+		post_data = {'data': {'attributes': {'publicLinkEnabled': True}, 'id': beta_group_id, 'type': 'betaGroups'}}
+
+		return self._api_call("/v1/betaGroups/" + beta_group_id, HttpMethod.PATCH, post_data)
 
 	def beta_group_info(self, beta_group_id):
 		return self._api_call("/v1/betaGroups/" + beta_group_id, HttpMethod.GET, None)
@@ -150,6 +154,9 @@ class Api:
 	def submit_app_for_beta_review(self, build_id):
 		post_data = {'data': { 'type': 'betaAppReviewSubmissions', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}}}
 		return self._api_call("/v1/betaAppReviewSubmissions", HttpMethod.POST, post_data)
+
+	def beta_appreview_submission(self, appreview_id):
+		return self._api_call("/v1/betaAppReviewSubmissions/" + appreview_id, HttpMethod.GET, None)
 
 	@property
 	def token(self):
