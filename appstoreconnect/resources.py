@@ -136,6 +136,10 @@ class BuildBetaDetail(Resource):
 class BetaBuildLocalization(Resource):
 	endpoint = '/v1/betaBuildLocalizations'
 	type = 'betaBuildLocalizations'
+	attributes = ['locale', 'whatsNew']
+	relationships = {
+		'build': {'multiple': False},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/betaBuildLocalization/attributes'
 
 
@@ -146,8 +150,12 @@ class BetaAppReviewDetail(Resource):
 
 
 class BetaAppReviewSubmission(Resource):
-	endpoint = '/v1/betaAppReviewDetails'
-	type = 'betaAppReviewDetails'
+	endpoint = '/v1/betaAppReviewSubmissions'
+	type = 'betaAppReviewSubmissions'
+	attributes = ['betaReviewState']
+	relationships = {
+		'build': {'multiple': False},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/betaAppReviewSubmission/attributes'
 
 

@@ -473,6 +473,14 @@ class Api:
 		"""
 		return self._get_resources(BetaAppReviewDetail, filters)
 
+	def submit_app_for_beta_review(self, build: Build) -> BetaAppReviewSubmission:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/submit_an_app_for_beta_review
+		:return: a BetaAppReviewSubmission resource
+		"""
+
+		return self._create_resource(BetaAppReviewSubmission, locals())
+
 	def list_beta_app_review_submissions(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_beta_app_review_submissions
@@ -480,11 +488,12 @@ class Api:
 		"""
 		return self._get_resources(BetaAppReviewSubmission, filters)
 
-	# TODO: implement these function using Resource
-	def submit_app_for_beta_review(self, build_id):
-		post_data = {'data': { 'type': 'betaAppReviewSubmissions', 'relationships': {'build': {'data': {'id': build_id, 'type': 'builds'}}}}}
-		payload = self._api_call(BASE_API + "/v1/betaAppReviewSubmissions", HttpMethod.POST, post_data)
-		return BetaAppReviewSubmission(payload.get('data'), {})
+	def read_beta_app_review_submission_information(self, beta_app_id: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_beta_app_review_submission_information
+		:return: an BetaAppReviewSubmission resource
+		"""
+		return self._get_resource(BetaAppReviewSubmission, beta_app_id)
 
 	# Provisioning
 	def list_bundle_ids(self, filters=None, sort=None):
