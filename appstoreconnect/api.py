@@ -562,10 +562,27 @@ class Api:
 
 	def download_sales_and_trends_reports(self, filters=None, save_to=None):
 		# setup required filters if not provided
+		default_versions = {
+			'SALES': '1_0',
+			'SUBSCRIPTION': '1_2',
+			'SUBSCRIPTION_EVENT': '1_2',
+			'SUBSCRIBER': '1_2',
+			'NEWSSTAND': '1_0',
+			'PRE_ORDER': '1_0',
+		}
+		default_subtypes = {
+			'SALES': 'SUMMARY',
+			'SUBSCRIPTION': 'SUMMARY',
+			'SUBSCRIPTION_EVENT': 'SUMMARY',
+			'SUBSCRIBER': 'DETAILED',
+			'NEWSSTAND': 'DETAILED',
+			'PRE_ORDER': 'SUMMARY',
+		}
 		for required_key, default_value in (
 				('frequency', 'DAILY'),
-				('reportSubType', 'SUMMARY'),
 				('reportType', 'SALES'),
+				('reportSubType',  default_subtypes.get(filters.get('reportType', 'SALES'), 'SUMMARY')),
+				('version', default_versions.get(filters.get('reportType', 'SALES'), '1_0')),
 				# vendorNumber is required but we cannot provide a default value
 		):
 			if required_key not in filters:
