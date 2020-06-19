@@ -67,6 +67,27 @@ api.download_finance_reports(filters={'vendorNumber': '123456789', 'reportDate':
 
 Please note this is a work in progress, API is subject to change between versions.
 
+Anonymous data collection
+-------------------------
+
+Starting with version 0.8.0 this library anonymously collects its usage to help better improve its development. 
+What we collect is:
+
+- a SHA1 hash of the issuer_id
+- the OS and Python version used
+- which enpoints had been used
+
+You can review the [source code](https://github.com/Ponytech/appstoreconnectapi/blob/b73d4314e2a9f9098f3287f57fff687563e70b28/appstoreconnect/api.py#L238)
+
+If you feel uncomfortable with it you can completely opt-out by initliazing the API with:
+
+```python
+api = Api(key_id, path_to_key_file, issuer_id, submit_stats=False)
+```
+
+The is also an [open issue](https://github.com/Ponytech/appstoreconnectapi/issues/18) about this topic where we would love to here your feedback and best practices.
+
+
 Development
 -----------
 
