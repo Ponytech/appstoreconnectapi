@@ -97,13 +97,13 @@ Project development happens on [Github](https://github.com/Ponytech/appstoreconn
 TODO
 ----
 
-* [ ] handle POST, DELETE and PATCH requests
+* [ ] Support App Store Connect API 1.2
+* [X] handle POST, DELETE and PATCH requests
 * [X] sales report
 * [X] handle related resources
 * [X] allow to sort resources
 * [ ] proper API documentation
 * [ ] add tests
-* [X] handle the new "Provisioning" section
 
 
 Credits
