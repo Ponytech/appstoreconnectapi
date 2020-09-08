@@ -1,3 +1,8 @@
+## 0.8.1
+
+Bugfixes:
+ - Add default versions and subtypes in download_sales_and_trends_reports
+
 ## 0.8.0
 
 Features:
