@@ -47,3 +47,8 @@ git
 
 # Apple AuthKeys
 AuthKey_*
+
+# Files used or generated during dev/tetsing
+*.csv
+*.p8
+test_api_gc.py

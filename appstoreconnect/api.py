@@ -539,7 +539,7 @@ class Api:
 		return self._get_resources(Profile, filters, sort)
 
 	# Reporting
-	def download_finance_reports(self, filters=None, save_to=None):
+	def download_finance_reports(self, filters=None, split_response=False, save_to=None):
 		# setup required filters if not provided
 		for required_key, default_value in (
 				('regionCode', 'ZZ'),
@@ -553,6 +553,18 @@ class Api:
 		url = "%s%s" % (BASE_API, FinanceReport.endpoint)
 		url = self._build_query_parameters(url, filters)
 		response = self._api_call(url)
+
+		if split_response:
+			res1 = response.split('Total_Rows')[0]
+			res2 = '\n'.join(response.split('Total_Rows')[1].split('\n')[1:])
+
+			if save_to:
+				file1 = Path(save_to[0])
+				file1.write_text(res1, 'utf-8')
+				file2 = Path(save_to[1])
+				file2.write_text(res2, 'utf-8')
+
+			return res1, res2
 
 		if save_to:
 			file = Path(save_to)
