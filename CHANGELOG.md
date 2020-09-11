@@ -1,3 +1,10 @@
+## 0.8.2
+
+Features:
+ - New `split_response` argument in `download_finance_reports()` function that splits the response into 2 objects. Defualt value is `split_response=False`. This also
+ allows the 2 responses to be saved to separate files using a syntax like `save_to=['test1.csv', 'test2.csv']`.
+
+
 ## 0.8.1
 
 Bugfixes:
