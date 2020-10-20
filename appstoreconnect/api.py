@@ -285,8 +285,9 @@ class Api:
 		"""
 		post_data = {'data': {'attributes': {'allAppsVisible': all_apps_visible, 'email': email, 'firstName': first_name, 'lastName': last_name, 'provisioningAllowed': provisioning_allowed, 'roles': roles}, 'type': 'userInvitations'}}
 		if visible_apps is not None:
-			post_data['data']['relationships'] = {'visibleApps': list(map(lambda a: {'id': a, 'type': 'apps'}, visible_apps))}
-			post_data['data']['relationships'] = {'visibleApps': visible_apps_relationship}
+			visible_apps_relationship = list(map(lambda a: {'id': a, 'type': 'apps'}, visible_apps))
+			visible_apps_data = {'visibleApps': {'data': visible_apps_relationship}}
+			post_data['data']['relationships'] = visible_apps_data
 		payload = self._api_call(BASE_API + "/v1/userInvitations", HttpMethod.POST, post_data)
 		return UserInvitation(payload.get('data'), {})
 
