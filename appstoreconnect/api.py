@@ -13,6 +13,30 @@ class HttpMethod(Enum):
 	POST = 2
 	PATCH = 3
 
+class AppStoreState(Enum):
+	DEVELOPER_REMOVED_FROM_SALE = "DEVELOPER_REMOVED_FROM_SALE"
+	DEVELOPER_REJECTED = "DEVELOPER_REJECTED"
+	IN_REVIEW = "IN_REVIEW"
+	INVALID_BINARY = "INVALID_BINARY"
+	METADATA_REJECTED = "METADATA_REJECTED"
+	PENDING_APPLE_RELEASE = "PENDING_APPLE_RELEASE"
+	PENDING_CONTRACT = "PENDING_CONTRACT"
+	PENDING_DEVELOPER_RELEASE = "PENDING_DEVELOPER_RELEASE"
+	PREPARE_FOR_SUBMISSION = "PREPARE_FOR_SUBMISSION"
+	PREORDER_READY_FOR_SALE = "PREORDER_READY_FOR_SALE"
+	PROCESSING_FOR_APP_STORE = "PROCESSING_FOR_APP_STORE"
+	READY_FOR_SALE = "READY_FOR_SALE"
+	REJECTED = "REJECTED"
+	REMOVED_FROM_SALE = "REMOVED_FROM_SALE"
+	WAITING_FOR_EXPORT_COMPLIANCE = "WAITING_FOR_EXPORT_COMPLIANCE"
+	WAITING_FOR_REVIEW = "WAITING_FOR_REVIEW"
+	REPLACED_WITH_NEW_VERSION = "REPLACED_WITH_NEW_VERSION"
+
+	@staticmethod
+	def editableStates():
+		return list(map(lambda x: x.name, [AppStoreState.DEVELOPER_REJECTED, AppStoreState.INVALID_BINARY, AppStoreState.METADATA_REJECTED, AppStoreState.PREPARE_FOR_SUBMISSION, AppStoreState.REJECTED]))
+
+
 class Api:
 
 	def __init__(self, key_id, key_file, issuer_id):
@@ -47,11 +71,11 @@ class Api:
 
 		contentType = r.headers['content-type']
 
+		if r.status_code not in range(200,299):
+			print("Error [%d][%s]" % (r.status_code, r.content))
+
 		if contentType == "application/json":
 			return r.json()
-		else:
-			if r.status_code not in range(200,299):
-				print("Error [%d][%s]" % (r.status_code, r.content))
 
 	#apps
 
@@ -60,6 +84,9 @@ class Api:
 
 	def app_for_sku(self, sku):
 		return self._api_call("/v1/apps?filter[sku]=" + sku, HttpMethod.GET, None)
+
+	def app_for_bundleId(self, bundle_id):
+		return self._api_call("/v1/apps?filter[bundleId]=" + bundle_id, HttpMethod.GET, None)
 
 	#users
 
@@ -126,6 +153,9 @@ class Api:
 	def builds_for_app_and_version_and_prerelease_version(self, app_id, version, prerelease_version):
 		return self._api_call("/v1/builds?filter[app]=" + app_id + "&filter[version]=" + version + "&filter[preReleaseVersion]=" + prerelease_version, HttpMethod.GET, None)
 
+	def builds_for_app_and_version_and_prerelease_version_version(self, app_id, prerelease_version_version, version):
+		return self._api_call("/v1/builds?filter[app]=" + app_id + "&filter[version]=" + version + "&filter[preReleaseVersion.version]=" + prerelease_version_version, HttpMethod.GET, None)
+
 	def build_processing_state(self, app_id, build_id):
 		return self._api_call("/v1/builds?filter[app]=" + app_id + "&filter[id]=" + build_id + "&fields[builds]=processingState", HttpMethod.GET, None)
 
@@ -157,6 +187,39 @@ class Api:
 
 	def beta_appreview_submission(self, appreview_id):
 		return self._api_call("/v1/betaAppReviewSubmissions/" + appreview_id, HttpMethod.GET, None)
+
+	#territories
+
+	def territories(self):
+		return self._api_call("/v1/territories", HttpMethod.GET, None)
+
+	#build icons
+	def build_icons_for_build(self, build_id):
+		return self._api_call("/v1/builds/" + build_id+ "/icons", HttpMethod.GET, None)
+
+	#appstore versions
+	def appstoreversions_for_app(self, app_id):
+		return self._api_call("/v1/apps/" + app_id+ "/appStoreVersions", HttpMethod.GET, None)
+
+	def create_new_version_for_app(self, versionString, app_id):
+		post_data = {'data': { 'type': 'appStoreVersions', 'relationships': {'app': {'data': {'id': app_id, 'type': 'apps'}}}, 'attributes': { 'platform': 'IOS', 'versionString': versionString}}}
+		return self._api_call("/v1/appStoreVersions", HttpMethod.POST, post_data)
+
+	def update_appstoreversion(self, appstoreversion_id, attributes, relationships):
+		post_data = {'data': { 'id': appstoreversion_id, 'type': 'appStoreVersions', 'attributes': attributes , 'relationships': relationships }}
+		return self._api_call("/v1/appStoreVersions/" + appstoreversion_id, HttpMethod.PATCH, post_data)
+
+	def update_versionString_for_appstoreversion(self, appstoreversion_id, versionString):
+		attributes = { 'versionString': versionString }
+		self.update_appstoreversion(appstoreversion_id, attributes, {})
+
+	def associate_build_to_appstoreversion(self, build_id, appstoreversion_id):
+		post_data = {'data': { 'id': build_id, 'type': 'builds' }}
+		return self._api_call("/v1/appStoreVersions/" + appstoreversion_id + "/relationships/build", HttpMethod.PATCH, post_data)
+
+	def idfadeclaration_for_appstoreversion(self, appstoreversion_id):
+		return self._api_call("/v1/appStoreVersions/" + appstoreversion_id+ "/idfaDeclaration", HttpMethod.GET, None)
+
 
 	@property
 	def token(self):
