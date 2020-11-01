@@ -98,6 +98,7 @@ TODO
 ----
 
 * [ ] Support App Store Connect API 1.2
+* [ ] Support the include parameter
 * [X] handle POST, DELETE and PATCH requests
 * [X] sales report
 * [X] handle related resources
