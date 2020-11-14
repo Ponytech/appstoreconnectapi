@@ -48,6 +48,9 @@ git
 # Apple AuthKeys
 AuthKey_*
 
+# VSCode
+.vscode
+
 # Files used or generated during dev/tetsing
 *.csv
 *.p8
