@@ -51,7 +51,7 @@ AuthKey_*
 # VSCode
 .vscode
 
-# Files used or generated during dev/tetsing
+# Files used or generated during dev/testing
 *.csv
 *.p8
 test_api_sales.py
