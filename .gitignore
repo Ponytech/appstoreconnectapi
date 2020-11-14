@@ -54,4 +54,5 @@ AuthKey_*
 # Files used or generated during dev/tetsing
 *.csv
 *.p8
-test_api_gc.py
+test_api_sales.py
+test_api_finance.py
