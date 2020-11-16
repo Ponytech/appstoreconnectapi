@@ -48,7 +48,11 @@ git
 # Apple AuthKeys
 AuthKey_*
 
-# Files used or generated during dev/tetsing
+# VSCode
+.vscode
+
+# Files used or generated during dev/testing
 *.csv
 *.p8
-test_api_gc.py
+test_api_sales.py
+test_api_finance.py
