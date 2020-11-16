@@ -25,8 +25,11 @@ class HttpMethod(Enum):
 
 
 class APIError(Exception):
-	def __init__(self, error_string, error_code):
-		self.code = error_code
+	def __init__(self, error_string, status_code):
+		try:
+			self.status_code = int(status_code)
+		except ValueError:
+			pass
 		super().__init__(error_string)
 
 
