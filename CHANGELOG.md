@@ -1,3 +1,8 @@
+## 0.8.4
+
+Features:
+-  Expose the HTTP status code when App Store Connect API response raises APIError (@GClunies)
+
 ## 0.8.3
 
 Bugfixes:
