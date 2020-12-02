@@ -420,6 +420,7 @@ class Api:
 		:param app_ip:
 		:return: an App resource
 		"""
+		print("HELLLLLOO")
 		return self._get_resource(App, app_ip)
 
 	def list_apps(self, filters=None, sort=None):
@@ -612,6 +613,15 @@ class Api:
 		:return: an iterator over Build resources
 		"""
 		return self._get_resource(Build, build_id)
+
+	def UpdateAppCategories(self, appInfoId, primary, secondary):
+ 		if (len(secondary) != 0 and len(primary) != 0):
+ 			post_data = {'data':{'type':'appInfos','id':appInfoId,'relationships':{'primaryCategory':{'data':{'type':'appCategories','id':primary}},'secondaryCategory':{'data':{'type':'appCategories','id':secondary}}}}}
+ 		elif (len(primary) != 0 and len(secondary) == 0):
+ 			post_data = {'data':{'type':'appInfos','id':appInfoId,'relationships':{'primaryCategory':{'data':{'type':'appCategories','id':primary}}}}}
+ 		else:
+ 			return
+ 		return self._api_call(f"https://api.appstoreconnect.apple.com/v1/appInfos/{appInfoId}", HttpMethod.PATCH, post_data)
 
 	# Reporting
 	def download_finance_reports(self, filters=None, split_response=False, save_to=None):

@@ -227,3 +227,12 @@ class FinanceReport(Resource):
 class SalesReport(Resource):
 	endpoint = '/v1/salesReports'
 	filters = 'https://developer.apple.com/documentation/appstoreconnectapi/download_sales_and_trends_reports'
+
+class AppCategory(Resource):
+	type = 'appCategories'
+	attributes = ['platforms']
+	relationships = {
+		'parent': {'multiple': False},
+		'subcategories': {'multiple': True}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appcategory'
