@@ -420,7 +420,6 @@ class Api:
 		:param app_ip:
 		:return: an App resource
 		"""
-		print("HELLLLLOO")
 		return self._get_resource(App, app_ip)
 
 	def list_apps(self, filters=None, sort=None):
@@ -614,7 +613,25 @@ class Api:
 		"""
 		return self._get_resource(Build, build_id)
 
-	def UpdateAppCategories(self, appInfoId, primary, secondary):
+	def read_app_category_info(self, app_category_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_category_information
+		:return: an iterator over AppCategory resources
+		"""
+		return self._get_resource(AppCategory, app_category_id)
+
+	def get_app_info(self, app_id):
+		return self._api_call(BASE_API+f"/v1/apps/{app_id}/appInfos", HttpMethod.GET, None)
+
+	def list_app_infos(self, app_id: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_infos_for_an_app
+		:return: an iterator over AppCategory resources
+		"""
+		full_url = BASE_API + "/v1/apps/" + app_id + "/appInfos"
+		return self._get_resources(AppInfo, None, None, full_url)
+
+	'''def update_app_info(self, appInfoId, primary, secondary):
  		if (len(secondary) != 0 and len(primary) != 0):
  			post_data = {'data':{'type':'appInfos','id':appInfoId,'relationships':{'primaryCategory':{'data':{'type':'appCategories','id':primary}},'secondaryCategory':{'data':{'type':'appCategories','id':secondary}}}}}
  		elif (len(primary) != 0 and len(secondary) == 0):
@@ -622,6 +639,11 @@ class Api:
  		else:
  			return
  		return self._api_call(f"https://api.appstoreconnect.apple.com/v1/appInfos/{appInfoId}", HttpMethod.PATCH, post_data)
+		'''
+	def update_app_store_version(self, app_store_version: AppStoreVersion, args):
+		return self._modify_resource(app_store_version, args)
+	def update_app_info(self, app_information: AppInfo, args):
+ 		return self._modify_resource(app_information, args)
 
 	# Reporting
 	def download_finance_reports(self, filters=None, split_response=False, save_to=None):

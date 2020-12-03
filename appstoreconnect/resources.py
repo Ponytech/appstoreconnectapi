@@ -229,6 +229,7 @@ class SalesReport(Resource):
 	filters = 'https://developer.apple.com/documentation/appstoreconnectapi/download_sales_and_trends_reports'
 
 class AppCategory(Resource):
+	endpoint = '/v1/appCategories'
 	type = 'appCategories'
 	attributes = ['platforms']
 	relationships = {
@@ -236,3 +237,20 @@ class AppCategory(Resource):
 		'subcategories': {'multiple': True}
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appcategory'
+
+class AppInfo(Resource):
+	endpoint = '/v1/appInfos'
+	type = 'appInfos'
+	attributes = ['appStoreAgeRating', 'appStoreState', 'brazilAgeRating', 'kidsAgeBand']
+	relationships = {
+		'app': {'multiple': False},
+		'appInfoLocalizations': {'multiple': True},
+		'primaryCategory': {'multiple': False},
+		'primarySubcategoryOne': {'multiple': False},
+		'primarySubcategoryTwo': {'multiple': False},
+		'secondaryCategory': {'multiple': False},
+		'secondarySubcategoryOne': {'multiple': False},
+		'secondarySubcategoryTwo': {'multiple': False}
+
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appinfo'
