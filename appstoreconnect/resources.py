@@ -76,6 +76,17 @@ class BetaGroup(Resource):
 
 # App Metadata Resources
 
+class AppStoreVersionLocalization(Resource):
+	endpoint = '/v1/appStoreVersionLocalizations'
+	type = 'appStoreVersionLocalizations'
+	attributes = ['description', 'keywords', 'locale', 'marketingUrl', 'promotionalText' 'supportUrl', 'whatsNew']
+	relationships = {
+		'appPreviewSets': {'multiple': True},
+		'appScreenshotSets': {'multiple': True},
+		'appStoreVersion': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization'
+
 class AppStoreVersion(Resource):
 	endpoint = '/v1/appStoreVersions'
 	type = 'appStoreVersions'
@@ -92,6 +103,15 @@ class AppStoreVersion(Resource):
 		'routingAppCoverage': {'multiple': False},
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversion'
+
+class AppInfoLocalization(Resource):
+	endpoint = '/v1/appInfoLocalizations'
+	type = 'appInfoLocalizations'
+	attributes = ['locale', 'name', 'privacyPolicyText', 'privacyPolicyUrl', 'subtitle']
+	relationships = {
+		'appInfo': {'multiple': False},
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appinfolocalization'
 
 # App Resources
 
