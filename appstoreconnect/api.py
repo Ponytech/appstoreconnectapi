@@ -410,8 +410,7 @@ class Api:
 
 	def add_build_to_beta_group(self, beta_group_id, build_id):
 		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
-		payload = self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
-		return BetaGroup(payload.get('data'), {})
+		self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
 
 	# App Resources
 	def read_app_information(self, app_ip):
@@ -600,18 +599,27 @@ class Api:
 		"""
 		return self._get_resources(Profile, filters, sort)
 
-	def update_app_store_version(self, app_store_version: AppStoreVersion, args):
-		return self._modify_resource(app_store_version, args)
-
-	def create_new_version_for_app(self, app_store_version: AppStoreVersion, args):
-		return self._create_resource(app_store_version, args)
-
 	def get_build_info(self, build_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
 		:return: an iterator over Build resources
 		"""
 		return self._get_resource(Build, build_id)
+
+	# App Metadata
+	def modify_app_store_version(self, app_store_version: AppStoreVersion, versionString: str, build: Build = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version
+		:return: a Device resource
+		"""
+		return self._modify_resource(app_store_version, locals())
+
+	def create_new_app_store_version(self, platform: str, versionString: str, app: App, build: Build = None) -> AppStoreVersion:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
+		:return: a AppStoreVersion resource
+		"""
+		return self._create_resource(AppStoreVersion, locals())
 
 	# Reporting
 	def download_finance_reports(self, filters=None, split_response=False, save_to=None):
