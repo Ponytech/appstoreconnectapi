@@ -8,13 +8,28 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import time
 import json
-from enum import Enum
+from typing import List
+from enum import Enum, auto
 
 from .resources import *
 from .__version__ import __version__ as version
 
 ALGORITHM = 'ES256'
 BASE_API = "https://api.appstoreconnect.apple.com"
+
+
+class UserRole(Enum):
+	ADMIN = auto()
+	FINANCE = auto()
+	TECHNICAL = auto()
+	SALES = auto()
+	MARKETING = auto()
+	DEVELOPER = auto()
+	ACCOUNT_HOLDER = auto()
+	READ_ONLY = auto()
+	APP_MANAGER = auto()
+	ACCESS_TO_REPORTS = auto()
+	CUSTOMER_SUPPORT = auto()
 
 
 class HttpMethod(Enum):
@@ -117,7 +132,13 @@ class Api:
 		attributes = {}
 		for attribute in resource.attributes:
 			if attribute in args and args[attribute] is not None:
-				attributes[attribute] = args[attribute]
+				if type(args[attribute] == list):
+					value = list(map(lambda e: e.name if isinstance(e, Enum) else e, args[attribute]))
+				elif isinstance(args[attribute], Enum):
+					value = args[attribute].name
+				else:
+					value = args[attribute]
+				attributes[attribute] = value
 
 		post_data = {
 			'data': {
@@ -197,7 +218,7 @@ class Api:
 	def _api_call(self, url, method=HttpMethod.GET, post_data=None):
 		headers = {"Authorization": "Bearer %s" % self.token}
 		if self._debug:
-			print(url)
+			print("%s %s" % (method.value, url))
 
 		if self._submit_stats:
 			endpoint = url.replace(BASE_API, '')
@@ -219,9 +240,12 @@ class Api:
 		else:
 			raise APIError("Unknown HTTP method")
 
+		if self._debug:
+			print(r.status_code)
+
 		content_type = r.headers['content-type']
 
-		if content_type in [ "application/json", "application/vnd.api+json" ]:
+		if content_type in ["application/json", "application/vnd.api+json"]:
 			payload = r.json()
 			if 'errors' in payload:
 				raise APIError(
@@ -271,6 +295,19 @@ class Api:
 		return self._token
 
 	# Users and Roles
+	def modify_user_account(
+			self,
+			user: User,
+			allAppsVisible: bool = None,
+			provisioningAllowed: bool = None,
+			roles: List[UserRole] = None
+	):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_user_account
+		:return: a User resource
+		"""
+		return self._modify_resource(user, locals())
+
 	def list_users(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_users

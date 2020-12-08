@@ -163,6 +163,11 @@ class BetaAppReviewSubmission(Resource):
 
 class User(Resource):
 	endpoint = '/v1/users'
+	type = 'users'
+	attributes = ['allAppsVisible', 'provisioningAllowed', 'roles']
+	relationships = {
+		'visibleApps': {'multiple': True},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/user/attributes'
 
 
