@@ -130,6 +130,7 @@ class Api:
 
 	def _modify_resource(self, resource, args):
 		attributes = {}
+
 		for attribute in resource.attributes:
 			if attribute in args and args[attribute] is not None:
 				if type(args[attribute] == list):
@@ -140,6 +141,20 @@ class Api:
 					value = args[attribute]
 				attributes[attribute] = value
 
+		relationships = {}
+		if hasattr(resource, 'relationships'):
+			for relationship in resource.relationships:
+				if relationship in args and args[relationship] is not None:
+					relationships[relationship] = {}
+					relationships[relationship]['data'] = []
+					for relationship_object in args[relationship]:
+						relationships[relationship]['data'].append(
+							{
+								'id': relationship_object.id,
+								'type': relationship_object.type
+							}
+						)
+
 		post_data = {
 			'data': {
 				'attributes': attributes,
@@ -147,6 +162,9 @@ class Api:
 				'type': resource.type
 			}
 		}
+		if len(relationships):
+			post_data['data']['relationships'] = relationships
+
 		url = "%s%s/%s" % (BASE_API, resource.endpoint, resource.id)
 		if self._debug:
 			print(post_data)
@@ -300,7 +318,8 @@ class Api:
 			user: User,
 			allAppsVisible: bool = None,
 			provisioningAllowed: bool = None,
-			roles: List[UserRole] = None
+			roles: List[UserRole] = None,
+			visibleApps: List[App] = None,
 	):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_user_account
