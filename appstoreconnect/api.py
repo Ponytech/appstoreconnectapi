@@ -23,29 +23,6 @@ class HttpMethod(Enum):
 	PATCH = 3
 	DELETE = 4
 
-class AppStoreState(Enum):
-	DEVELOPER_REMOVED_FROM_SALE = "DEVELOPER_REMOVED_FROM_SALE"
-	DEVELOPER_REJECTED = "DEVELOPER_REJECTED"
-	IN_REVIEW = "IN_REVIEW"
-	INVALID_BINARY = "INVALID_BINARY"
-	METADATA_REJECTED = "METADATA_REJECTED"
-	PENDING_APPLE_RELEASE = "PENDING_APPLE_RELEASE"
-	PENDING_CONTRACT = "PENDING_CONTRACT"
-	PENDING_DEVELOPER_RELEASE = "PENDING_DEVELOPER_RELEASE"
-	PREPARE_FOR_SUBMISSION = "PREPARE_FOR_SUBMISSION"
-	PREORDER_READY_FOR_SALE = "PREORDER_READY_FOR_SALE"
-	PROCESSING_FOR_APP_STORE = "PROCESSING_FOR_APP_STORE"
-	READY_FOR_SALE = "READY_FOR_SALE"
-	REJECTED = "REJECTED"
-	REMOVED_FROM_SALE = "REMOVED_FROM_SALE"
-	WAITING_FOR_EXPORT_COMPLIANCE = "WAITING_FOR_EXPORT_COMPLIANCE"
-	WAITING_FOR_REVIEW = "WAITING_FOR_REVIEW"
-	REPLACED_WITH_NEW_VERSION = "REPLACED_WITH_NEW_VERSION"
-
-	@staticmethod
-	def editableStates():
-		return list(map(lambda x: x.name, [AppStoreState.DEVELOPER_REJECTED, AppStoreState.INVALID_BINARY, AppStoreState.METADATA_REJECTED, AppStoreState.PREPARE_FOR_SUBMISSION, AppStoreState.REJECTED]))
-
 class APIError(Exception):
 	def __init__(self, error_string, status_code):
 		try:
@@ -410,8 +387,7 @@ class Api:
 
 	def add_build_to_beta_group(self, beta_group_id, build_id):
 		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
-		payload = self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
-		return BetaGroup(payload.get('data'), {})
+		self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
 
 	# App Resources
 	def read_app_information(self, app_ip):
@@ -600,9 +576,6 @@ class Api:
 		"""
 		return self._get_resources(Profile, filters, sort)
 
-	def create_new_version_for_app(self, app_store_version: AppStoreVersion, args):
-		return self._create_resource(app_store_version, args)
-
 	def get_build_info(self, build_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
@@ -625,13 +598,6 @@ class Api:
 		full_url = BASE_API + "/v1/apps/" + app_id + "/appInfos"
 		return self._get_resources(AppInfo, None, None, full_url)
 
-	def modify_app_store_version(self, app_store_version: AppStoreVersion, args):
-		"""
-		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version
-		:return: an iterator over AppStoreVersion resources
-		"""
-		return self._modify_resource(app_store_version, args)
-
 	def modify_app_info(self, app_information: AppInfo, args):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_info
@@ -643,13 +609,6 @@ class Api:
 	def get_app_store_version_localizations(self, appstoreversion_id):
 		full_url = BASE_API + f"/v1/appStoreVersions/{appstoreversion_id}/appStoreVersionLocalizations"
 		return self._get_resources(AppStoreVersionLocalization, None, None, full_url)
-
-	def modify_app_store_version_localization(self, AppStoreVersionLocalizations, attributes):
-		"""
-		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization
-		:return: an iterator over AppInfoLocalization resources
-		"""
-		return self._modify_resource(AppStoreVersionLocalizations, attributes)
 
 	# appStoreInfo localization
 	def get_app_store_info_localization(self, app_information):
@@ -663,6 +622,20 @@ class Api:
 		"""
 		return self._modify_resource(AppInfoLocalization, attributes)
 
+	# App Metadata
+	def modify_app_store_version(self, app_store_version: AppStoreVersion, versionString: str, build: Build = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version
+		:return: a Device resource
+		"""
+		return self._modify_resource(app_store_version, locals())
+
+	def create_new_app_store_version(self, platform: str, versionString: str, app: App, build: Build = None) -> AppStoreVersion:
+		"""
+		:reference: https://ssdeveloper.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
+		:return: a AppStoreVersion resource
+		"""
+		return self._create_resource(AppStoreVersion, locals())
 	# Reporting
 	def download_finance_reports(self, filters=None, split_response=False, save_to=None):
 		# setup required filters if not provided

@@ -90,7 +90,7 @@ class AppStoreVersionLocalization(Resource):
 class AppStoreVersion(Resource):
 	endpoint = '/v1/appStoreVersions'
 	type = 'appStoreVersions'
-	attributes = ['platform', 'appStoreState', 'copyright', 'earliestReleaseDate', 'releaseType', 'usesIdfa', 'versionString', 'createdDate', 'downloadable']
+	attributes = ['platform', 'appStoreState', 'copyright', 'earliestReleaseDate', 'releaseType', 'usesIdfa', 'versionString', 'downloadable', 'createdDate']
 	relationships = {
 		'app': {'multiple': False},
 		'ageRatingDeclaration': {'multiple': False},
@@ -103,6 +103,36 @@ class AppStoreVersion(Resource):
 		'routingAppCoverage': {'multiple': False},
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversion'
+
+class AgeRatingDeclaration(Resource):
+	endpoint = '/v1/ageRatingDeclarations'
+	type = "ageRatingDeclarations"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/ageratingdeclaration'
+
+class AppStoreReviewDetail(Resource):
+	endpoint = '/v1/appStoreReviewDetails'
+	type = "appStoreReviewDetails"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstorereviewdetail'
+
+class AppStoreVersionLocalizations(Resource):
+	endpoint = '/v1/appStoreVersionLocalizations'
+	type = "appStoreVersionLocalizations"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization'
+
+class AppStoreVersionSubmission(Resource):
+	endpoint = '/v1/appStoreVersionSubmissions'
+	type = "appStoreVersionSubmissions"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionsubmission'
+
+class IdfaDeclaration(Resource):
+	endpoint = '/v1/idfaDeclarations'
+	type = "idfaDeclarations"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/idfadeclaration'
+
+class RoutingAppCoverage(Resource):
+	endpoint = '/v1/routingAppCoverages'
+	type = "routingAppCoverages"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/routingappcoverages'
 
 class AppInfoLocalization(Resource):
 	endpoint = '/v1/appInfoLocalizations'
