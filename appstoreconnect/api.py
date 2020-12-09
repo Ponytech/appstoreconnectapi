@@ -133,7 +133,7 @@ class Api:
 
 		for attribute in resource.attributes:
 			if attribute in args and args[attribute] is not None:
-				if type(args[attribute] == list):
+				if type(args[attribute]) == list:
 					value = list(map(lambda e: e.name if isinstance(e, Enum) else e, args[attribute]))
 				elif isinstance(args[attribute], Enum):
 					value = args[attribute].name
