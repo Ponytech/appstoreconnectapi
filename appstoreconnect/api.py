@@ -632,7 +632,7 @@ class Api:
 
 	def create_new_app_store_version(self, platform: str, versionString: str, app: App, build: Build = None) -> AppStoreVersion:
 		"""
-		:reference: https://ssdeveloper.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
 		:return: a AppStoreVersion resource
 		"""
 		return self._create_resource(AppStoreVersion, locals())
