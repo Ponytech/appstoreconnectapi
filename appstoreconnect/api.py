@@ -610,6 +610,13 @@ class Api:
 		full_url = BASE_API + f"/v1/appStoreVersions/{appstoreversion_id}/appStoreVersionLocalizations"
 		return self._get_resources(AppStoreVersionLocalization, None, None, full_url)
 
+	def modify_app_store_version_localization(self, AppStoreVersionLocalizations, attributes):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization
+		:return: an iterator over AppInfoLocalization resources
+		"""
+		return self._modify_resource(AppStoreVersionLocalizations, attributes)
+
 	# appStoreInfo localization
 	def get_app_store_info_localization(self, app_information):
 		full_url = BASE_API + f"/v1/appInfos/{app_information.id}/appInfoLocalizations"
@@ -623,14 +630,14 @@ class Api:
 		return self._modify_resource(AppInfoLocalization, attributes)
 
 	# App Metadata
-	def modify_app_store_version(self, app_store_version: AppStoreVersion, versionString: str, build: Build = None):
+	def modify_app_store_version(self, app_store_version: AppStoreVersion, versionString: str, copyright: str, build: Build = None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version
 		:return: a Device resource
 		"""
 		return self._modify_resource(app_store_version, locals())
 
-	def create_new_app_store_version(self, platform: str, versionString: str, app: App, build: Build = None) -> AppStoreVersion:
+	def create_new_app_store_version(self, platform: str, versionString: str, copyright: str, app: App, build: Build = None) -> AppStoreVersion:
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
 		:return: a AppStoreVersion resource
