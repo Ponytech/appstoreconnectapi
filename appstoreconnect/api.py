@@ -397,7 +397,7 @@ class Api:
 		:return: an App resource
 		"""
 		return self._get_resource(App, app_ip)
-	
+
 	def list_app_infos(self, app_id: str):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_infos_for_an_app
@@ -456,7 +456,6 @@ class Api:
 		return self._get_resources(BetaLicenseAgreement, filters)
 
 	# App Metadata Resources
-
 	def list_app_store_versions(self, app_id: str, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
@@ -629,21 +628,21 @@ class Api:
 		:return: a AppStoreVersion resource
 		"""
 		return self._create_resource(AppStoreVersion, locals())
-	
+
 	def read_app_category_info(self, app_category_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_category_information
 		:return: an iterator over AppCategory resources
 		"""
 		return self._get_resource(AppCategory, app_category_id)
-	
+
 	# App info Resources
-	def modify_app_info(self, app_information: AppInfo, args):
+	def modify_app_info(self, app_information: AppInfo, primaryCategory: str = None, secondaryCategory:str = None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_info
 		:return: an iterator over AppInfo resources
 		"""
-		return self._modify_resource(app_information, args)
+		return self._modify_resource(app_information, locals())
 
 	# Reporting
 	def download_finance_reports(self, filters=None, split_response=False, save_to=None):
