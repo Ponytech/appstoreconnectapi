@@ -603,7 +603,11 @@ class Api:
 		return self._modify_resource(AppStoreVersionLocalizations, attributes)
 
 	# appStoreInfo localization
-	def get_app_store_info_localization(self, app_information):
+	def list_app_store_info_localizations(self, app_information):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_info_localizations_for_an_app_info
+		:return: an iterator over AppInfoLocalization resources
+		"""
 		full_url = BASE_API + f"/v1/appInfos/{app_information.id}/appInfoLocalizations"
 		return self._get_resources(AppInfoLocalization, None, None, full_url)
 
@@ -637,6 +641,7 @@ class Api:
 		return self._get_resource(AppCategory, app_category_id)
 
 	# App info Resources
+
 	def modify_app_info(self, app_information: AppInfo, primaryCategory: str = None, secondaryCategory:str = None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_info
