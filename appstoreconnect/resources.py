@@ -79,7 +79,7 @@ class BetaGroup(Resource):
 class AppStoreVersionLocalization(Resource):
 	endpoint = '/v1/appStoreVersionLocalizations'
 	type = 'appStoreVersionLocalizations'
-	attributes = ['description', 'keywords', 'locale', 'marketingUrl', 'promotionalText' 'supportUrl', 'whatsNew']
+	attributes = ['description', 'keywords', 'locale', 'marketingUrl', 'promotionalText', 'supportUrl', 'whatsNew']
 	relationships = {
 		'appPreviewSets': {'multiple': True},
 		'appScreenshotSets': {'multiple': True},
