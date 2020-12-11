@@ -398,6 +398,14 @@ class Api:
 		"""
 		return self._get_resource(App, app_ip)
 
+	def list_app_infos(self, app_id: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_infos_for_an_app
+		:return: an iterator over AppCategory resources
+		"""
+		full_url = BASE_API + "/v1/apps/" + app_id + "/appInfos"
+		return self._get_resources(AppInfo, None, None, full_url)
+
 	def list_apps(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_apps
@@ -448,7 +456,6 @@ class Api:
 		return self._get_resources(BetaLicenseAgreement, filters)
 
 	# App Metadata Resources
-
 	def list_app_store_versions(self, app_id: str, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
@@ -583,20 +590,68 @@ class Api:
 		"""
 		return self._get_resource(Build, build_id)
 
+	# appStoreVersions localization
+	def list_app_store_version_localizations(self, appstoreversion):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version
+		:return: an iterator over AppStoreVersionLocalization resources
+		"""
+		full_url = BASE_API + f"/v1/appStoreVersions/{appstoreversion.id}/appStoreVersionLocalizations"
+		return self._get_resources(AppStoreVersionLocalization, None, None, full_url)
+
+	def modify_app_store_version_localization(self, app_store_version_localization: AppStoreVersionLocalization, description: str, keywords: str, marketingUrl: str, promotionalText: str, supportUrl: str, whatsNew: str ):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization
+		:return: an iterator over AppInfoLocalization resources
+		"""
+		return self._modify_resource(app_store_version_localization, locals())
+
+	# appStoreInfo localization
+	def list_app_store_info_localizations(self, app_information):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_info_localizations_for_an_app_info
+		:return: an iterator over AppInfoLocalization resources
+		"""
+		full_url = BASE_API + f"/v1/appInfos/{app_information.id}/appInfoLocalizations"
+		return self._get_resources(AppInfoLocalization, None, None, full_url)
+
+	def modify_app_store_info_localization(self, app_info_localization: AppInfoLocalization, name: str, privacyPolicyUrl: str, subtitle: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_info_localization
+		:return: an iterator over AppInfoLocalization resources
+		"""
+		return self._modify_resource(app_info_localization, locals())
+
 	# App Metadata
-	def modify_app_store_version(self, app_store_version: AppStoreVersion, versionString: str, build: Build = None):
+	def modify_app_store_version(self, app_store_version: AppStoreVersion, versionString: str, copyright: str, build: Build = None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version
 		:return: a Device resource
 		"""
 		return self._modify_resource(app_store_version, locals())
 
-	def create_new_app_store_version(self, platform: str, versionString: str, app: App, build: Build = None) -> AppStoreVersion:
+	def create_new_app_store_version(self, platform: str, versionString: str, copyright: str, app: App, build: Build = None) -> AppStoreVersion:
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
 		:return: a AppStoreVersion resource
 		"""
 		return self._create_resource(AppStoreVersion, locals())
+
+	def read_app_category_info(self, app_category_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_category_information
+		:return: an iterator over AppCategory resources
+		"""
+		return self._get_resource(AppCategory, app_category_id)
+
+	# App info Resources
+
+	def modify_app_info(self, app_information: AppInfo, primaryCategory: str = None, secondaryCategory:str = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_info
+		:return: an iterator over AppInfo resources
+		"""
+		return self._modify_resource(app_information, locals())
 
 	# Reporting
 	def download_finance_reports(self, filters=None, split_response=False, save_to=None):

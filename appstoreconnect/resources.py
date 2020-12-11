@@ -76,6 +76,17 @@ class BetaGroup(Resource):
 
 # App Metadata Resources
 
+class AppStoreVersionLocalization(Resource):
+	endpoint = '/v1/appStoreVersionLocalizations'
+	type = 'appStoreVersionLocalizations'
+	attributes = ['description', 'keywords', 'locale', 'marketingUrl', 'promotionalText' 'supportUrl', 'whatsNew']
+	relationships = {
+		'appPreviewSets': {'multiple': True},
+		'appScreenshotSets': {'multiple': True},
+		'appStoreVersion': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization'
+
 class AppStoreVersion(Resource):
 	endpoint = '/v1/appStoreVersions'
 	type = 'appStoreVersions'
@@ -122,6 +133,15 @@ class RoutingAppCoverage(Resource):
 	endpoint = '/v1/routingAppCoverages'
 	type = "routingAppCoverages"
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/routingappcoverages'
+
+class AppInfoLocalization(Resource):
+	endpoint = '/v1/appInfoLocalizations'
+	type = 'appInfoLocalizations'
+	attributes = ['locale', 'name', 'privacyPolicyText', 'privacyPolicyUrl', 'subtitle']
+	relationships = {
+		'appInfo': {'multiple': False},
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appinfolocalization'
 
 # App Resources
 
@@ -257,3 +277,30 @@ class FinanceReport(Resource):
 class SalesReport(Resource):
 	endpoint = '/v1/salesReports'
 	filters = 'https://developer.apple.com/documentation/appstoreconnectapi/download_sales_and_trends_reports'
+
+class AppCategory(Resource):
+	endpoint = '/v1/appCategories'
+	type = 'appCategories'
+	attributes = ['platforms']
+	relationships = {
+		'parent': {'multiple': False},
+		'subcategories': {'multiple': True}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appcategory'
+
+class AppInfo(Resource):
+	endpoint = '/v1/appInfos'
+	type = 'appInfos'
+	attributes = ['appStoreAgeRating', 'appStoreState', 'brazilAgeRating', 'kidsAgeBand']
+	relationships = {
+		'app': {'multiple': False},
+		'appInfoLocalizations': {'multiple': True},
+		'primaryCategory': {'multiple': False},
+		'primarySubcategoryOne': {'multiple': False},
+		'primarySubcategoryTwo': {'multiple': False},
+		'secondaryCategory': {'multiple': False},
+		'secondarySubcategoryOne': {'multiple': False},
+		'secondarySubcategoryTwo': {'multiple': False}
+
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appinfo'
