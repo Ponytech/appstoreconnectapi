@@ -91,6 +91,10 @@ class App(Resource):
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/app'
 
 
+class VisibleApp(App):
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/list_all_apps_visible_to_a_user'
+
+
 class PreReleaseVersion(Resource):
 	endpoint = '/v1/preReleaseVersions'
 	type = 'preReleaseVersion'
