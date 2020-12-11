@@ -87,6 +87,15 @@ class AppStoreVersionLocalization(Resource):
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization'
 
+class AgeRatingDeclarations(Resource):
+	endpoint = '/v1/ageRatingDeclarations'
+	attributes = ['alcoholTobaccoOrDrugUseOrReferences', 'gamblingAndContests', 'kidsAgeBand', 'medicalOrTreatmentInformation',
+	'profanityOrCrudeHumor', 'sexualContentOrNudity', 'unrestrictedWebAccess', 'gamblingSimulated', 'horrorOrFearThemes',
+	'matureOrSuggestiveThemes', 'sexualContentGraphicAndNudity', 'violenceCartoonOrFantasy', 'violenceRealistic', 'violenceRealisticProlongedGraphicOrSadistic']
+	relationships = {}
+	type = 'ageRatingDeclarations'
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/ageratingdeclaration'
+
 class AppStoreVersion(Resource):
 	endpoint = '/v1/appStoreVersions'
 	type = 'appStoreVersions'
