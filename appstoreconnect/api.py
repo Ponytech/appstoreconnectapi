@@ -185,6 +185,10 @@ class Api:
 				self.total_length = None
 				self.payload = None
 
+			def __getitem__(self, item):
+				items = list(self)
+				return items[item]
+
 			def __iter__(self):
 				return self
 
