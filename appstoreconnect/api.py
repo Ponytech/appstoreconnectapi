@@ -84,9 +84,27 @@ class Api:
 		payload = self._api_call(url)
 		return Resource(payload.get('data', {}), self)
 
-	def _get_related_resource(self, Resource, full_url):
+	def _get_resource_from_payload_data(self, payload):
+		try:
+			resource_type = resources[payload.get('type')]
+		except KeyError:
+			raise APIError("Unsupported resource type %s" % resources[payload.get('type')])
+
+		return resource_type(payload, self)
+
+	def get_related_resource(self, full_url):
 		payload = self._api_call(full_url)
-		return Resource(payload.get('data', {}), self)
+		data = payload.get('data')
+		if data is None:
+			return None
+		elif type(data) == dict:
+			return self._get_resource_from_payload_data(data)
+
+	def get_related_resources(self, full_url):
+		payload = self._api_call(full_url)
+		data = payload.get('data', [])
+		for resource in data:
+			yield self._get_resource_from_payload_data(resource)
 
 	def _create_resource(self, Resource, args):
 		attributes = {}
