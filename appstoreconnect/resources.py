@@ -41,6 +41,16 @@ class Resource(ABC):
 	def endpoint(self):
 		pass
 
+	@property
+	@abstractmethod
+	def attributes(self):
+		pass
+
+	@property
+	@abstractmethod
+	def relationships(self):
+		pass
+
 
 # Beta Testers and Groups
 
@@ -86,6 +96,24 @@ class App(Resource):
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/app'
 
 
+class AppStoreVersion(Resource):
+	endpoint = '/v1/apps/{id}/appStoreVersions'
+	type = 'appStoreVersions'
+	attributes = ['platform', 'appStoreState', 'copyright', 'earliestReleaseDate', 'releaseType', 'usesIdfa', 'versionString', 'createdDate', 'downloadable']
+	relationships = {
+		'app': {'multiple': False},
+		'ageRatingDeclaration': {'multiple': False},
+		'appStoreReviewDetail': {'multiple': False},
+		'appStoreVersionLocalizations': {'multiple': False},
+		'appStoreVersionPhasedRelease': {'multiple': False},
+		'appStoreVersionSubmission': {'multiple': False},
+		'build': {'multiple': False},
+		'idfaDeclaration': {'multiple': False},
+		'routingAppCoverage': {'multiple': False},
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversion'
+
+
 class PreReleaseVersion(Resource):
 	endpoint = '/v1/preReleaseVersions'
 	type = 'preReleaseVersion'
@@ -119,6 +147,18 @@ class BetaLicenseAgreement(Resource):
 class Build(Resource):
 	endpoint = '/v1/builds'
 	type = 'builds'
+	attributes = ['expired', 'iconAssetToken', 'minOsVersion', 'processingState', 'version', 'usesNonExemptEncryption', 'uploadedDate', 'expirationDate']
+	relationships = {
+		'app': {'multiple': False},
+		'appEncryptionDeclaration': {'multiple': False},
+		'individualTesters': {'multiple': True},
+		'preReleaseVersion': {'multiple': False},
+		'betaBuildLocalizations': {'multiple': True},
+		'buildBetaDetail': {'multiple': False},
+		'betaAppReviewSubmission': {'multiple': False},
+		'appStoreVersion': {'multiple': False},
+		'icons': {'multiple': True},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/build/attributes'
 
 
