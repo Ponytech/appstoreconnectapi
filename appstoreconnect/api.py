@@ -465,20 +465,21 @@ class Api:
 		full_url = BASE_API + "/v1/apps/" + app_id + "/appStoreVersions"
 		return self._get_resources(AppStoreVersion, filters, sort, full_url)
 
-	def modify_Age_Rating_Declarations(self, Resource, args):
+	def modify_age_rating_declarations(self, Resource, args):
 		"""
-		:reference: https://api.appstoreconnect.apple.com/v1/ageRatingDeclarations/{id}
-		:return: an iterator over Age Rating Declaration resources
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_age_rating_declaration
+		:return: an iterator over AgeRatingDeclarations resources
 		"""
 		return self._modify_resource(Resource, args)
 
 	def read_age_rating_declarations_info(self, appstoreversion_id):
-		return self._get_resource_adi(AgeRatingDeclarations, appstoreversion_id)
-
-	def _get_resource_adi(self, Resource, resource_id):
- 		url = BASE_API + "/v1/appStoreVersions/" + resource_id + "/ageRatingDeclaration"
- 		payload = self._api_call(url)
- 		return Resource(payload.get('data', {}), self)
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_the_age_rating_declaration_information_of_an_app_store_version
+		:return: an iterator over AgeRatingDeclarations resources
+		"""
+		url = BASE_API + "/v1/appStoreVersions/" + appstoreversion_id + "/ageRatingDeclaration"
+		payload = self._api_call(url)
+		return AgeRatingDeclarations(payload.get('data', {}), self)
 
 	# Build Resources
 	def list_builds(self, filters=None, sort=None):
