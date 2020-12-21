@@ -465,6 +465,22 @@ class Api:
 		full_url = BASE_API + "/v1/apps/" + app_id + "/appStoreVersions"
 		return self._get_resources(AppStoreVersion, filters, sort, full_url)
 
+	def modify_age_rating_declarations(self, Resource, args):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_age_rating_declaration
+		:return: an iterator over AgeRatingDeclarations resources
+		"""
+		return self._modify_resource(Resource, args)
+
+	def read_age_rating_declarations_info(self, appstoreversion_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_the_age_rating_declaration_information_of_an_app_store_version
+		:return: an iterator over AgeRatingDeclarations resources
+		"""
+		url = BASE_API + "/v1/appStoreVersions/" + appstoreversion_id + "/ageRatingDeclaration"
+		payload = self._api_call(url)
+		return AgeRatingDeclarations(payload.get('data', {}), self)
+
 	# Build Resources
 	def list_builds(self, filters=None, sort=None):
 		"""
