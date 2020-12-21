@@ -109,6 +109,14 @@ class AgeRatingDeclaration(Resource):
 	type = "ageRatingDeclarations"
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/ageratingdeclaration'
 
+class Territory(Resource):
+	endpoint = '/v1/territories'
+	type = 'territories'
+	attributes = 'currency'
+	relationships = {}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/territory'
+
+
 class AppStoreReviewDetail(Resource):
 	endpoint = '/v1/appStoreReviewDetails'
 	type = "appStoreReviewDetails"
