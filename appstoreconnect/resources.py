@@ -76,6 +76,25 @@ class BetaGroup(Resource):
 
 # App Metadata Resources
 
+class AppScreenshot(Resource):
+	endpoint = '/v1/appScreenshots'
+	type = 'appScreenshots'
+	attributes = ['assetDeliveryState', 'assetToken', 'assetType', 'fileName', 'fileSize', 'imageAsset', 'sourceFileChecksum', 'uploadOperations']
+	relationships = {
+		'appScreenshotSet': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appscreenshot'
+
+class AppScreenshotSet(Resource):
+	endpoint = '/v1/appScreenshotSets'
+	type = 'appScreenshotSets'
+	attributes = ['screenshotDisplayType']
+	relationships = {
+		'appScreenshots': {'multiple': True},
+		'appStoreVersionLocalization': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appscreenshotset'
+
 class AppStoreVersionLocalization(Resource):
 	endpoint = '/v1/appStoreVersionLocalizations'
 	type = 'appStoreVersionLocalizations'

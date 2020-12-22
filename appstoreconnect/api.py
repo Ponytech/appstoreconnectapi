@@ -461,7 +461,6 @@ class Api:
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
 		:return: an iterator over AppStoreVersion resources
 		"""
-
 		full_url = BASE_API + "/v1/apps/" + app_id + "/appStoreVersions"
 		return self._get_resources(AppStoreVersion, filters, sort, full_url)
 
@@ -480,6 +479,22 @@ class Api:
 		url = BASE_API + "/v1/appStoreVersions/" + appstoreversion_id + "/ageRatingDeclaration"
 		payload = self._api_call(url)
 		return AgeRatingDeclarations(payload.get('data', {}), self)
+
+	def list_all_app_screenshots_sets_for_an_app_store_version_localization(self, appstoreversionlocalization_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_screenshot_sets_for_an_app_store_version_localization
+		:return: an iterator over AppScreenshotSet resources
+		"""
+		url = BASE_API + "/v1/appStoreVersionLocalizations/" + appstoreversionlocalization_id + "/appScreenshotSets"
+		return self._get_resources(AppScreenshotSet, None, None, url)
+
+	def list_all_app_screenshots_for_an_app_screenshot_set(self, appscreenshotsets_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_screenshots_for_an_app_screenshot_set
+		:return: an iterator over AppScreenshot resources
+		"""
+		url = BASE_API + "/v1/appScreenshotSets/" + appscreenshotsets_id + "/appScreenshots"
+		return self._get_resources(AppScreenshotSet, None, None, url)
 
 	# Build Resources
 	def list_builds(self, filters=None, sort=None):
