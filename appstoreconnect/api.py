@@ -660,6 +660,21 @@ class Api:
 		"""
 		return self._get_resource(AppCategory, app_category_id)
 
+	def list_all_available_territories_for_an_app(self, app_id):
+ 		"""
+ 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_available_territories_for_an_app
+ 		:return: an iterator over Territory resources
+ 		"""
+ 		full_url = BASE_API + "/v1/apps/" + app_id + "/availableTerritories"
+ 		return self._get_resources(Territory, None, None, full_url)
+
+	def list_territories(self):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_territories
+		:return: an iterator over a list of Territory resources
+		"""
+		return self._get_resources(Territory, None, None, None)
+
 	# App info Resources
 
 	def modify_app_info(self, app_information: AppInfo, primaryCategory: str = None, secondaryCategory:str = None):
