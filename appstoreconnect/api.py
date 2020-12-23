@@ -496,6 +496,13 @@ class Api:
 		url = BASE_API + "/v1/appScreenshotSets/" + appscreenshotsets_id + "/appScreenshots"
 		return self._get_resources(AppScreenshot, None, None, url)
 
+	def modify_an_app_screenshot(self, Ressource, appscreenshot):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_screenshot
+		:return: an iterator over AppScreenshot resources
+		"""
+		return self._modify_resource(Resource, appscreenshot)
+
 	# Build Resources
 	def list_builds(self, filters=None, sort=None):
 		"""
