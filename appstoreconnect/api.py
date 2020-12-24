@@ -503,12 +503,24 @@ class Api:
 		"""
 		return self._modify_resource(res, sourceFileChecksum)
 
-	def create_an_asset_reversion(self, fileSize: str, fileName: str):
+	def create_an_asset_reversion(self, appScreenshotSet: AppScreenshotSet, fileSize: int, fileName: str):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/uploading_assets_to_app_store_connect
 		:return: an iterator over AppScreenshot resources
 		"""
 		return self._create_resource(AppScreenshot, locals())
+
+	def upload_the_asset(self, uploadOperation, binary):
+		'''envoyer juste le header et le body = image direct sans legth offset ect'''
+		method = uploadOperation['method']
+		url = uploadOperation['url']
+		length = uploadOperation['length']
+		offset = uploadOperation['offset']
+		requestHeaders = uploadOperation['requestHeaders']
+
+		return requests.put(url=url, data={"headers":requestHeaders, "length":length, "offset":offset})
+
+
 
 	# Build Resources
 	def list_builds(self, filters=None, sort=None):
