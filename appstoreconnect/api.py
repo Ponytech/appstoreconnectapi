@@ -496,12 +496,19 @@ class Api:
 		url = BASE_API + "/v1/appScreenshotSets/" + appscreenshotsets_id + "/appScreenshots"
 		return self._get_resources(AppScreenshot, None, None, url)
 
-	def modify_an_app_screenshot(self, Ressource, appscreenshot):
+	def modify_an_app_screenshot(self, res, sourceFileChecksum):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_screenshot
 		:return: an iterator over AppScreenshot resources
 		"""
-		return self._modify_resource(Resource, appscreenshot)
+		return self._modify_resource(res, sourceFileChecksum)
+
+	def create_an_asset_reversion(self, fileSize: str, fileName: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/uploading_assets_to_app_store_connect
+		:return: an iterator over AppScreenshot resources
+		"""
+		return self._create_resource(AppScreenshot, locals())
 
 	# Build Resources
 	def list_builds(self, filters=None, sort=None):
