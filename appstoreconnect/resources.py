@@ -79,7 +79,7 @@ class BetaGroup(Resource):
 class AppScreenshot(Resource):
 	endpoint = '/v1/appScreenshots'
 	type = 'appScreenshots'
-	attributes = ['assetDeliveryState', 'assetToken', 'assetType', 'fileName', 'fileSize', 'imageAsset', 'sourceFileChecksum', 'uploadOperations']
+	attributes = ['assetDeliveryState', 'assetToken', 'assetType', 'fileName', 'fileSize', 'imageAsset', 'sourceFileChecksum', 'uploadOperations', 'uploaded']
 	relationships = {
 		'appScreenshotSet': {'multiple': False}
 	}

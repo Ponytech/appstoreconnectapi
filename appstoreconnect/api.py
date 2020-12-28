@@ -232,6 +232,7 @@ class Api:
 			r = requests.post(url=url, headers=headers, data=json.dumps(post_data))
 		elif method == HttpMethod.PATCH:
 			headers["Content-Type"] = "application/json"
+			print("HERE:", json.dumps(post_data))
 			r = requests.patch(url=url, headers=headers, data=json.dumps(post_data))
 		elif method == HttpMethod.DELETE:
 			r = requests.delete(url=url, headers=headers)
@@ -496,14 +497,15 @@ class Api:
 		url = BASE_API + "/v1/appScreenshotSets/" + appscreenshotsets_id + "/appScreenshots"
 		return self._get_resources(AppScreenshot, None, None, url)
 
-	def modify_an_app_screenshot(self, res, sourceFileChecksum):
+	def modify_an_app_screenshot(self, screenshot, sourceFileChecksum: str, uploaded: bool):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_screenshot
 		:return: an iterator over AppScreenshot resources
 		"""
-		return self._modify_resource(res, sourceFileChecksum)
+		attributes = {'sourceFileChecksum':sourceFileChecksum, 'uploaded':uploaded}
+		return self._modify_resource(screenshot, attributes)
 
-	def create_an_asset_reversion(self, appScreenshotSet: AppScreenshotSet, fileSize: int, fileName: str):
+	def create_an_asset_reservation(self, appScreenshotSet: AppScreenshotSet, fileSize: int, fileName: str):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/uploading_assets_to_app_store_connect
 		:return: an iterator over AppScreenshot resources
@@ -514,11 +516,16 @@ class Api:
 		'''envoyer juste le header et le body = image direct sans legth offset ect'''
 		method = uploadOperation['method']
 		url = uploadOperation['url']
-		length = uploadOperation['length']
-		offset = uploadOperation['offset']
 		requestHeaders = uploadOperation['requestHeaders']
 
-		return requests.put(url=url, data={"headers":requestHeaders, "length":length, "offset":offset})
+		return requests.put(url=url, data = binary, headers = {'Content-Type':'image/png'})
+
+	def read_app_screenshot_information(self, appScreenshot_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_screenshot_information
+		:return: an iterator over AppScreenshot resource
+		"""
+		return self._get_resource(AppScreenshot, appScreenshot_id)
 
 
 
