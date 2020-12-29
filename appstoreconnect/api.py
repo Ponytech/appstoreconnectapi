@@ -497,13 +497,13 @@ class Api:
 		url = BASE_API + "/v1/appScreenshotSets/" + appscreenshotsets_id + "/appScreenshots"
 		return self._get_resources(AppScreenshot, None, None, url)
 
-	def modify_an_app_screenshot(self, screenshot, sourceFileChecksum: str, uploaded: bool):
+	def modify_an_app_screenshot(self, app_screenshot: AppScreenshot, sourceFileChecksum: str, uploaded: bool):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_screenshot
 		:return: an iterator over AppScreenshot resources
 		"""
 		attributes = {'sourceFileChecksum':sourceFileChecksum, 'uploaded':uploaded}
-		return self._modify_resource(screenshot, attributes)
+		return self._modify_resource(app_screenshot, attributes)
 
 	def create_an_asset_reservation(self, appScreenshotSet: AppScreenshotSet, fileSize: int, fileName: str):
 		"""
@@ -527,6 +527,12 @@ class Api:
 		"""
 		return self._get_resource(AppScreenshot, appScreenshot_id)
 
+	def delete_an_app_screenshot(self, app_screenshot):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_screenshot
+		:return: an iterator over AppScreenshot resource
+		"""
+		return self._delete_resource(app_screenshot)
 
 
 	# Build Resources
