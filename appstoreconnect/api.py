@@ -534,11 +534,12 @@ class Api:
 		"""
 		return self._delete_resource(app_screenshot)
 
-	def replace_all_app_screenshots_for_an_app_screenshot_set(self, appScreenshot_Set, post_data):
+	def replace_all_app_screenshots_for_an_app_screenshot_set(self, appScreenshot_Set, data):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/replace_all_app_screenshots_for_an_app_screenshot_set
 		:return: an iterator over AppScreenshotSet resource
 		"""
+		post_data = {"data": data }
 		return self._api_call(BASE_API + "/v1/appScreenshotSets/" + appScreenshot_Set.id + "/relationships/appScreenshots", HttpMethod.PATCH, post_data)
 
 
