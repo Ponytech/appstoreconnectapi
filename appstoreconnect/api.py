@@ -232,7 +232,6 @@ class Api:
 			r = requests.post(url=url, headers=headers, data=json.dumps(post_data))
 		elif method == HttpMethod.PATCH:
 			headers["Content-Type"] = "application/json"
-			print("HERE:", json.dumps(post_data))
 			r = requests.patch(url=url, headers=headers, data=json.dumps(post_data))
 		elif method == HttpMethod.DELETE:
 			r = requests.delete(url=url, headers=headers)
