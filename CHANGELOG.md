@@ -1,3 +1,12 @@
+## 0.9.0
+
+Features:
+- New endpoint: `modify_user_account`
+- Support getting more related resources, like `user.visibleApps()`
+
+Bugfixes:
+- Pin dependencies versions in setup.py
+
 ## 0.8.4
 
 Features:
