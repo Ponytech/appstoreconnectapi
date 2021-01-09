@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from appstoreconnect import Api
+from appstoreconnect import Api, UserRole
 
 
 if __name__ == "__main__":
@@ -18,6 +18,10 @@ if __name__ == "__main__":
 	# filter apps
 	apps = api.list_apps(filters={'sku': 'DINORUSH', 'name': 'Dino Rush'})
 	print("%d apps found" % len(apps))
+
+	# modify a user
+	user = api.list_users(filters={'username': 'finance@nemoidstudio.com'})[0]
+	api.modify_user_account(user, roles=[UserRole.FINANCE, UserRole.APP_MANAGER, UserRole.ACCESS_TO_REPORTS])
 
 	# download sales report
 	api.download_sales_and_trends_reports(

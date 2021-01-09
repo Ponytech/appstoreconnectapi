@@ -22,7 +22,7 @@ Please follow instructions on [Apple documentation](https://developer.apple.com/
 With your *key ID*, *key file* (you can either pass the path to the file or the content of it as a string) and *issuer ID* create a new API instance:
 
 ```python
-from appstoreconnect import Api
+from appstoreconnect import Api, UserRole
 api = Api(key_id, path_to_key_file, issuer_id)
 ```
 
@@ -57,6 +57,10 @@ for bundle_id in api.list_bundle_ids():
 for certificate in api.list_certificates():
     print(certificate.name)
 
+# modify a user
+user = api.list_users(filters={'username': 'finance@nemoidstudio.com'})[0]
+api.modify_user_account(user, roles=[UserRole.FINANCE, UserRole.ACCESS_TO_REPORTS])
+    
 # download sales report
 api.download_sales_and_trends_reports(
     filters={'vendorNumber': '123456789', 'frequency': 'WEEKLY', 'reportDate': '2019-06-09'}, save_to='report.csv')
