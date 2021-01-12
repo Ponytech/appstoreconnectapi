@@ -160,6 +160,15 @@ class AppInfoLocalization(Resource):
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appinfolocalization'
 
+class AppStoreVersionPhasedRelease(Resource):
+	endpoint = '/v1/appStoreVersionPhasedReleases'
+	type = 'appStoreVersionPhasedReleases'
+	attributes = ['currentDayNumber', 'phasedReleaseState', 'startDate', 'totalPauseDuration']
+	relationships = {
+		'appStoreVersion': {'multiple': False},
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionphasedrelease'
+
 # App Resources
 
 class App(Resource):
