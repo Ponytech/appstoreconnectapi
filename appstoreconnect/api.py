@@ -665,7 +665,7 @@ class Api:
  		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_available_territories_for_an_app
  		:return: an iterator over Territory resources
  		"""
- 		full_url = BASE_API + "/v1/apps/" + app_id + "/availableTerritories"
+ 		full_url = BASE_API + "/v1/apps/" + app_id + "/availableTerritories?limit=200"
  		return self._get_resources(Territory, None, None, full_url)
 
 	def list_territories(self):
