@@ -646,6 +646,13 @@ class Api:
 		"""
 		return self._modify_resource(app_store_version, locals())
 
+	def delete_app_store_version(self, app_store_version: AppStoreVersion):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version
+		:return: None
+		"""
+		return self._delete_resource(app_store_version)
+
 	def create_new_app_store_version(self, platform: str, versionString: str, copyright: str, app: App, build: Build = None) -> AppStoreVersion:
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
