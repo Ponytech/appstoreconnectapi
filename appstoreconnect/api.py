@@ -512,7 +512,10 @@ class Api:
 		return self._create_resource(AppScreenshot, locals())
 
 	def upload_the_asset(self, uploadOperation, binary):
-		'''envoyer juste le header et le body = image direct sans legth offset ect'''
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/uploading_assets_to_app_store_connect
+		:return: an json answer
+		"""
 		method = uploadOperation['method']
 		url = uploadOperation['url']
 		requestHeaders = uploadOperation['requestHeaders']
