@@ -710,6 +710,13 @@ class Api:
 		"""
 		return self._modify_resource(app_store_version, locals())
 
+	def delete_app_store_version(self, app_store_version: AppStoreVersion):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version
+		:return: None
+		"""
+		return self._delete_resource(app_store_version)
+
 	def create_new_app_store_version(self, platform: str, versionString: str, copyright: str, app: App, build: Build = None) -> AppStoreVersion:
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
@@ -723,6 +730,21 @@ class Api:
 		:return: an iterator over AppCategory resources
 		"""
 		return self._get_resource(AppCategory, app_category_id)
+
+	def list_all_available_territories_for_an_app(self, app_id):
+ 		"""
+ 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_available_territories_for_an_app
+ 		:return: an iterator over Territory resources
+ 		"""
+ 		full_url = BASE_API + "/v1/apps/" + app_id + "/availableTerritories?limit=200"
+ 		return self._get_resources(Territory, None, None, full_url)
+
+	def list_territories(self):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_territories
+		:return: an iterator over a list of Territory resources
+		"""
+		return self._get_resources(Territory, None, None, None)
 
 	# App info Resources
 
