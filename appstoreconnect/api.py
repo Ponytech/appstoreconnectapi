@@ -528,8 +528,8 @@ class Api:
 		        headerString = headerString + ", "
 		headerString = headerString + "}"
 
-		heders = yaml.load(headerString)
-		return requests.put(url=url, data = binary, headers = heders)
+		headers = yaml.load(headerString)
+		return requests.put(url=url, data = binary, headers = headers)
 
 	def read_app_screenshot_information(self, appScreenshot_id):
 		"""
