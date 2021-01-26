@@ -8,6 +8,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import time
 import json
+import yaml
 from enum import Enum
 
 from resources import *
@@ -518,10 +519,17 @@ class Api:
 		"""
 		method = uploadOperation['method']
 		url = uploadOperation['url']
-		requestHeaderType = uploadOperation['requestHeaders'][0]['name']
-		requestHeaderImage = uploadOperation['requestHeaders'][0]['value']
+		headerString = "{"
+		for x, y in enumerate(uploadOperation['requestHeaders']):
+		    name = uploadOperation['requestHeaders'][x]['name']
+		    value = uploadOperation['requestHeaders'][x]['value']
+		    headerString = headerString +str(name)+" : "+str(value)
+		    if x < len(uploadOperation['requestHeaders']) -1:
+		        headerString = headerString + ", "
+		headerString = headerString + "}"
 
-		return requests.put(url=url, data = binary, headers = {requestHeaderType:requestHeaderImage})
+		heders = yaml.load(headerString)
+		return requests.put(url=url, data = binary, headers = heders)
 
 	def read_app_screenshot_information(self, appScreenshot_id):
 		"""
