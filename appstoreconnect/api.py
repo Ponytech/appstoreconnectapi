@@ -518,9 +518,10 @@ class Api:
 		"""
 		method = uploadOperation['method']
 		url = uploadOperation['url']
-		requestHeaders = uploadOperation['requestHeaders']
+		requestHeaderType = uploadOperation['requestHeaders'][0]['name']
+		requestHeaderImage = uploadOperation['requestHeaders'][0]['value']
 
-		return requests.put(url=url, data = binary, headers = {'Content-Type':'image/png'})
+		return requests.put(url=url, data = binary, headers = {requestHeaderType:requestHeaderImage})
 
 	def read_app_screenshot_information(self, appScreenshot_id):
 		"""
