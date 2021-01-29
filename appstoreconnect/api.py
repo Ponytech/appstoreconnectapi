@@ -8,7 +8,6 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import time
 import json
-import yaml
 from enum import Enum
 
 from resources import *
@@ -472,29 +471,29 @@ class Api:
 		"""
 		return self._modify_resource(Resource, args)
 
-	def read_age_rating_declarations_info(self, appstoreversion_id):
+	def read_age_rating_declarations_info(self, app_store_version_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_the_age_rating_declaration_information_of_an_app_store_version
 		:return: an iterator over AgeRatingDeclarations resources
 		"""
-		url = BASE_API + "/v1/appStoreVersions/" + appstoreversion_id + "/ageRatingDeclaration"
+		url = BASE_API + "/v1/appStoreVersions/" + app_store_version_id + "/ageRatingDeclaration"
 		payload = self._api_call(url)
 		return AgeRatingDeclarations(payload.get('data', {}), self)
 
-	def list_all_app_screenshots_sets_for_an_app_store_version_localization(self, appstoreversionlocalization_id):
+	def list_all_app_screenshots_sets_for_an_app_store_version_localization(self, app_store_version_localization_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_screenshot_sets_for_an_app_store_version_localization
 		:return: an iterator over AppScreenshotSet resources
 		"""
-		url = BASE_API + "/v1/appStoreVersionLocalizations/" + appstoreversionlocalization_id + "/appScreenshotSets"
+		url = BASE_API + "/v1/appStoreVersionLocalizations/" + app_store_version_localization_id + "/appScreenshotSets"
 		return self._get_resources(AppScreenshotSet, None, None, url)
 
-	def list_all_app_screenshots_for_an_app_screenshot_set(self, appscreenshotsets_id):
+	def list_all_app_screenshots_for_an_app_screenshot_set(self, app_screen_shot_sets_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_screenshots_for_an_app_screenshot_set
 		:return: an iterator over AppScreenshot resources
 		"""
-		url = BASE_API + "/v1/appScreenshotSets/" + appscreenshotsets_id + "/appScreenshots"
+		url = BASE_API + "/v1/appScreenshotSets/" + app_screen_shot_sets_id + "/appScreenshots"
 		return self._get_resources(AppScreenshot, None, None, url)
 
 	def modify_an_app_screenshot(self, app_screenshot: AppScreenshot, sourceFileChecksum: str, uploaded: bool):
@@ -512,31 +511,25 @@ class Api:
 		"""
 		return self._create_resource(AppScreenshot, locals())
 
-	def upload_the_asset(self, uploadOperation, binary):
+	def upload_the_asset(self, upload_operation, binary):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/uploading_assets_to_app_store_connect
 		:return: an json answer
 		"""
-		method = uploadOperation['method']
-		url = uploadOperation['url']
-		headerString = "{"
-		for x, y in enumerate(uploadOperation['requestHeaders']):
-		    name = uploadOperation['requestHeaders'][x]['name']
-		    value = uploadOperation['requestHeaders'][x]['value']
-		    headerString = headerString +str(name)+" : "+str(value)
-		    if x < len(uploadOperation['requestHeaders']) -1:
-		        headerString = headerString + ", "
-		headerString = headerString + "}"
+		headers = {}
+		url = upload_operation['url']
 
-		headers = yaml.load(headerString)
+		for header in upload_operation['requestHeaders']:
+			headers[header['name']] = header['value']
+
 		return requests.put(url=url, data = binary, headers = headers)
 
-	def read_app_screenshot_information(self, appScreenshot_id):
+	def read_app_screenshot_information(self, app_screenshot_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_screenshot_information
 		:return: an iterator over AppScreenshot resource
 		"""
-		return self._get_resource(AppScreenshot, appScreenshot_id)
+		return self._get_resource(AppScreenshot, app_screenshot_id)
 
 	def delete_an_app_screenshot(self, app_screenshot):
 		"""
@@ -545,13 +538,13 @@ class Api:
 		"""
 		return self._delete_resource(app_screenshot)
 
-	def replace_all_app_screenshots_for_an_app_screenshot_set(self, appScreenshot_Set, data):
+	def replace_all_app_screenshots_for_an_app_screenshot_set(self, app_screenshot_set, data):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/replace_all_app_screenshots_for_an_app_screenshot_set
 		:return: an iterator over AppScreenshotSet resource
 		"""
 		post_data = {"data": data }
-		return self._api_call(BASE_API + "/v1/appScreenshotSets/" + appScreenshot_Set.id + "/relationships/appScreenshots", HttpMethod.PATCH, post_data)
+		return self._api_call(BASE_API + "/v1/appScreenshotSets/" + app_screenshot_set.id + "/relationships/appScreenshots", HttpMethod.PATCH, post_data)
 
 
 	# Build Resources
@@ -680,12 +673,12 @@ class Api:
 		return self._get_resource(Build, build_id)
 
 	# appStoreVersions localization
-	def list_app_store_version_localizations(self, appstoreversion):
+	def list_app_store_version_localizations(self, app_store_version):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version
 		:return: an iterator over AppStoreVersionLocalization resources
 		"""
-		full_url = BASE_API + f"/v1/appStoreVersions/{appstoreversion.id}/appStoreVersionLocalizations"
+		full_url = BASE_API + f"/v1/appStoreVersions/{app_store_version.id}/appStoreVersionLocalizations"
 		return self._get_resources(AppStoreVersionLocalization, None, None, full_url)
 
 	def modify_app_store_version_localization(self, app_store_version_localization: AppStoreVersionLocalization, description: str, keywords: str, marketingUrl: str, promotionalText: str, supportUrl: str, whatsNew: str ):
