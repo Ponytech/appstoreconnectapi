@@ -66,11 +66,17 @@ class Api:
 	def _get_resource(self, Resource, resource_id):
 		url = "%s%s/%s" % (BASE_API, Resource.endpoint, resource_id)
 		payload = self._api_call(url)
-		return Resource(payload.get('data', {}), self)
+		payloadData = payload.get('data', {})
+		if not payloadData:
+			return None
+		return Resource(payloadData, self)
 
 	def _get_related_resource(self, Resource, full_url):
 		payload = self._api_call(full_url)
-		return Resource(payload.get('data', {}), self)
+		payloadData = payload.get('data', {})
+		if not payloadData:
+			return None
+		return Resource(payloadData, self)
 
 	def _create_resource(self, Resource, args):
 		attributes = {}
