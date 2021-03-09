@@ -696,3 +696,10 @@ class Api:
 			file.write_text(response, 'utf-8')
 
 		return response
+
+	def get_power_and_performance_metrics_for_an_app(self, app_id: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/get_power_and_performance_metrics_for_an_app
+		:return: an iterator over AppEncryptionDeclaration resources
+		"""
+		return self._get_resources(PerfPowerMetric, app_id)

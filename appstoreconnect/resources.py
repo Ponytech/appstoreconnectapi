@@ -248,6 +248,14 @@ class SalesReport(Resource):
 	filters = 'https://developer.apple.com/documentation/appstoreconnectapi/download_sales_and_trends_reports'
 
 
+class PerfPowerMetric(Resource):
+	endpoint = '/v1/apps/{id}/perfPowerMetrics'
+	type = 'perfpowermetric'
+	attributes = ['deviceType', 'metricType', 'platform']
+	relationships = {}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/perfpowermetric'
+
+
 # create an index of Resources by type
 resources = {}
 for name, obj in inspect.getmembers(sys.modules[__name__]):
