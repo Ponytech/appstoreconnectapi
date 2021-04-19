@@ -88,7 +88,7 @@ class App(Resource):
 
 class PreReleaseVersion(Resource):
 	endpoint = '/v1/preReleaseVersions'
-	type = 'preReleaseVersion'
+	type = 'preReleaseVersions'
 	attributes = ['platform', 'version']
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/preReleaseVersion/attributes'
 
@@ -120,6 +120,17 @@ class Build(Resource):
 	endpoint = '/v1/builds'
 	type = 'builds'
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/build/attributes'
+	relationships = {
+		'app': {'multiple': False},
+		'appEncryptionDeclaration': {'multiple': False},
+		'individualTesters': {'multiple': True},
+		'preReleaseVersion': {'multiple': False},
+		'betaBuildLocalizations': {'multiple': True},
+		'buildBetaDetail': {'multiple': False},
+		'betaAppReviewSubmission': {'multiple': False},
+		'appStoreVersion': {'multiple': False},
+		'icons': {'multiple': True},
+	}
 
 
 class BuildBetaDetail(Resource):
