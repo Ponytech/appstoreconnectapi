@@ -40,10 +40,10 @@ class HttpMethod(Enum):
 
 
 class APIError(Exception):
-	def __init__(self, error_string, status_code):
+	def __init__(self, error_string, status_code=None):
 		try:
 			self.status_code = int(status_code)
-		except ValueError:
+		except (ValueError, TypeError):
 			pass
 		super().__init__(error_string)
 
@@ -88,7 +88,7 @@ class Api:
 		try:
 			resource_type = resources[payload.get('type')]
 		except KeyError:
-			raise APIError("Unsupported resource type %s" % resources[payload.get('type')])
+			raise APIError("Unsupported resource type %s" % payload.get('type'))
 
 		return resource_type(payload, self)
 
