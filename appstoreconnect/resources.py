@@ -301,7 +301,13 @@ class Device(Resource):
 class Profile(Resource):
 	endpoint = '/v1/profiles'
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/profile/attributes'
-
+	type = 'profiles'
+	attributes = ['name', 'platform', 'profileContent', 'uuid', 'createdDate', 'profileState', 'profileType', 'expirationDate']
+	relationships = {
+		'certificates': {'multiple': True},
+		'devices': {'multiple': True},
+		'bundleId': {'multiple': False},
+	}
 
 # Reporting
 
