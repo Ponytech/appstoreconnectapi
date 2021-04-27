@@ -263,7 +263,6 @@ class Api:
 			return data.decode("utf-8")
 		else:
 			if not 200 <= r.status_code <= 299:
-				print(r.status_code)
 				raise APIError("HTTP error [%d][%s]" % (r.status_code, r.content))
 			return r
 
@@ -668,7 +667,6 @@ class Api:
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_and_download_profiles
 		:return: an iterator over Profile resources
 		"""
-		#return self._get_resources(Profile, filters, sort, locals())
 		return self._get_resources(Profile, filters, sort)
 
 	def read_profile(self, profileId):
@@ -677,15 +675,6 @@ class Api:
 		:return: an iterator over Profile resources
 		"""
 		return self._get_resource(Profile, profileId)
-
-	def get_profiles_with_budleId(self, url):
-		""""
-		:reference: Dmytro's brain
-		:return: an iterator over profile resource
-		"""
-		payload = self._api_call(url, HttpMethod.GET)
-		return payload
-		#return Profile(payload.get('data'), {})
 
 	def get_build_info(self, build_id):
 		"""

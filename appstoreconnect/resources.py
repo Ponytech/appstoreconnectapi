@@ -13,8 +13,7 @@ class Resource(ABC):
 		if item in self._data.get('attributes', {}):
 			return self._data.get('attributes', {})[item]
 		if item in self._data.get('relationships', {}):
-			return self._data.get('relationships', {})[item]
-			'''def callable():
+			def callable():
 				# Try to fetch relationship
 				nonlocal item
 				is_resources = item[-1] == 's'
@@ -28,7 +27,7 @@ class Resource(ABC):
 					return self._api._get_resources(item_cls, full_url=url)
 				else:
 					return self._api._get_related_resource(item_cls, full_url=url)
-			return callable'''
+			return callable
 
 		raise AttributeError('%s have no attributes %s' % (self.type_name, item))
 
