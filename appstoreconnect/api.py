@@ -496,6 +496,21 @@ class Api:
 		url = BASE_API + "/v1/appScreenshotSets/" + app_screen_shot_set_id + "/appScreenshots"
 		return self._get_resources(AppScreenshot, None, None, url)
 
+	def create_an_app_screenshot_set(self, screenshotDisplayType: str, appStoreVersionLocalization: AppStoreVersionLocalization):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_screenshot_set
+		:return: an iterator over AppScreenshotSet resources
+		"""
+		return self._create_resource(AppScreenshotSet, locals())
+
+	def delete_an_app_screenshot_set(self, appScreenshotSet: AppScreenshotSet):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_screenshot_set
+		:return: an iterator over AppScreenshotSet resources
+		"""
+		return self._delete_resource(appScreenshotSet)
+
+
 	def modify_an_app_screenshot(self, app_screenshot: AppScreenshot, sourceFileChecksum: str, uploaded: bool):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_screenshot
