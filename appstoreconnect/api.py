@@ -34,7 +34,7 @@ class APIError(Exception):
 
 class Api:
 
-	def __init__(self, key_id, key_file, issuer_id, submit_stats=True):
+	def __init__(self, key_id, key_file, issuer_id, submit_stats=False):
 		self._token = None
 		self.token_gen_date = None
 		self.exp = None
@@ -164,6 +164,10 @@ class Api:
 				self.index = 0
 				self.total_length = None
 				self.payload = None
+
+			def __getitem__(self, item):
+				items = list(self)
+				return items[item]
 
 			def __iter__(self):
 				return self
@@ -680,6 +684,13 @@ class Api:
 		"""
 		return self._get_resources(Profile, filters, sort)
 
+	def read_profile(self, profileId):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_and_download_profile_information
+		:return: an iterator over Profile resources
+		"""
+		return self._get_resource(Profile, profileId)
+
 	def get_build_info(self, build_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
@@ -771,6 +782,7 @@ class Api:
 		:return: an iterator over AppInfo resources
 		"""
 		return self._modify_resource(app_information, locals())
+
 
 	# Reporting
 	def download_finance_reports(self, filters=None, split_response=False, save_to=None):

@@ -281,6 +281,13 @@ class UserInvitation(Resource):
 # Provisioning
 class BundleId(Resource):
 	endpoint = '/v1/bundleIds'
+	type = 'bundleIds'
+	attributes = ['identifier', 'name', 'platform', 'seedId']
+	relationships = {
+		'profiles': {'multiple': True},
+		'bundleIdCapabilities': {'multiple': True},
+		'app': {'multiple': False},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/bundleid/attributes'
 
 
@@ -301,7 +308,13 @@ class Device(Resource):
 class Profile(Resource):
 	endpoint = '/v1/profiles'
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/profile/attributes'
-
+	type = 'profiles'
+	attributes = ['name', 'platform', 'profileContent', 'uuid', 'createdDate', 'profileState', 'profileType', 'expirationDate']
+	relationships = {
+		'certificates': {'multiple': True},
+		'devices': {'multiple': True},
+		'bundleId': {'multiple': False},
+	}
 
 # Reporting
 
