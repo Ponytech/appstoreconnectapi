@@ -1,3 +1,10 @@
+## 0.9.1
+
+Bugfixes:
+- Relax required dependencies in setup.py 
+- Fix APIError exception handling
+- Add relationships attribute to the Build resource
+
 ## 0.9.0
 
 Features:
