@@ -66,11 +66,17 @@ class Api:
 	def _get_resource(self, Resource, resource_id):
 		url = "%s%s/%s" % (BASE_API, Resource.endpoint, resource_id)
 		payload = self._api_call(url)
-		return Resource(payload.get('data', {}), self)
+		payloadData = payload.get('data', {})
+		if not payloadData:
+			return None
+		return Resource(payloadData, self)
 
 	def _get_related_resource(self, Resource, full_url):
 		payload = self._api_call(full_url)
-		return Resource(payload.get('data', {}), self)
+		payloadData = payload.get('data', {})
+		if not payloadData:
+			return None
+		return Resource(payloadData, self)
 
 	def _create_resource(self, Resource, args):
 		attributes = {}
@@ -774,6 +780,35 @@ class Api:
 		"""
 		return self._get_resources(Territory, None, None, None)
 
+	#App Store Version Phased RELEASE
+	def create_an_app_store_version_phased_release(self, phased_release_state: str, appStoreVersion: AppStoreVersion):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_phased_release
+		:return: an iterator over AppStoreVersionPhasedRelease resources
+		"""
+		return self._create_resource(AppStoreVersionPhasedRelease, locals())
+
+	def read_the_app_store_version_phased_release_information_of_an_app_store_version(self, resource_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_the_app_store_version_phased_release_information_of_an_app_store_version
+		:return: an iterator over AppStoreVersionPhasedRelease resources
+		"""
+		url = f"https://api.appstoreconnect.apple.com/v1/appStoreVersions/{resource_id}/appStoreVersionPhasedRelease"
+		return self._get_related_resource(AppStoreVersionPhasedRelease, url)
+
+	def delete_an_app_store_version_phased_release(self, appStoreVersionPhasedRelease: AppStoreVersionPhasedRelease ):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version_phased_release
+		:return: an empty iterator over a list of AppStoreVersionPhasedRelease resources
+		"""
+		return self._delete_resource(appStoreVersionPhasedRelease)
+
+	def modify_an_app_store_version_phased_release(self, appStoreVersionPhasedRelease: AppStoreVersionPhasedRelease, phasedReleaseState: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_phased_release
+		:return: an iterator over a list of AppStoreVersionPhasedRelease resources
+		"""
+		return self._modify_resource(appStoreVersionPhasedRelease, locals())
 	# App info Resources
 
 	def modify_app_info(self, app_information: AppInfo, primaryCategory: str = None, secondaryCategory:str = None):
