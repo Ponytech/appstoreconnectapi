@@ -647,6 +647,14 @@ class Api:
 		"""
 		return self._get_resource(BetaAppReviewSubmission, beta_app_id)
 
+	def create_an_app_store_version_submission(self, appStoreVersion: AppStoreVersion):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_submission
+		:return: an AppStoreVersionSubmission resource
+		"""
+		return self._create_resource(AppStoreVersionSubmission, locals())
+
+
 	# Provisioning
 	def list_bundle_ids(self, filters=None, sort=None):
 		"""

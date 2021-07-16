@@ -158,6 +158,10 @@ class AppStoreVersionLocalizations(Resource):
 class AppStoreVersionSubmission(Resource):
 	endpoint = '/v1/appStoreVersionSubmissions'
 	type = "appStoreVersionSubmissions"
+	attributes = []
+	relationships = {
+		'appStoreVersion': {'multiple': False}
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionsubmission'
 
 class IdfaDeclaration(Resource):
