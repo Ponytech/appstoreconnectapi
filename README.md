@@ -69,6 +69,16 @@ api.download_sales_and_trends_reports(
 api.download_finance_reports(filters={'vendorNumber': '123456789', 'reportDate': '2019-06'}, save_to='finance.csv')
 ```
 
+Define a timeout (in seconds) after which an exception is raised if no response is received. 
+
+```python
+api = Api(key_id, path_to_key_file, issuer_id, timeout=30)
+api.list_apps()
+
+APIError: Read timeout after 30 seconds
+```
+
+
 Please note this is a work in progress, API is subject to change between versions.
 
 Anonymous data collection

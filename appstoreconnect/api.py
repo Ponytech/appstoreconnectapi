@@ -50,7 +50,7 @@ class APIError(Exception):
 
 class Api:
 
-	def __init__(self, key_id, key_file, issuer_id, submit_stats=True):
+	def __init__(self, key_id, key_file, issuer_id, submit_stats=True, timeout=None):
 		self._token = None
 		self.token_gen_date = None
 		self.exp = None
@@ -58,6 +58,7 @@ class Api:
 		self.key_file = key_file
 		self.issuer_id = issuer_id
 		self.submit_stats = submit_stats
+		self.timeout = timeout
 		self._call_stats = defaultdict(int)
 		if self.submit_stats:
 			self._submit_stats("session_start")
@@ -267,18 +268,21 @@ class Api:
 			request = "%s %s" % (method.name, endpoint)
 			self._call_stats[request] += 1
 
-		if method == HttpMethod.GET:
-			r = requests.get(url, headers=headers)
-		elif method == HttpMethod.POST:
-			headers["Content-Type"] = "application/json"
-			r = requests.post(url=url, headers=headers, data=json.dumps(post_data))
-		elif method == HttpMethod.PATCH:
-			headers["Content-Type"] = "application/json"
-			r = requests.patch(url=url, headers=headers, data=json.dumps(post_data))
-		elif method == HttpMethod.DELETE:
-			r = requests.delete(url=url, headers=headers)
-		else:
-			raise APIError("Unknown HTTP method")
+		try:
+			if method == HttpMethod.GET:
+				r = requests.get(url, headers=headers, timeout=self.timeout)
+			elif method == HttpMethod.POST:
+				headers["Content-Type"] = "application/json"
+				r = requests.post(url=url, headers=headers, data=json.dumps(post_data), timeout=self.timeout)
+			elif method == HttpMethod.PATCH:
+				headers["Content-Type"] = "application/json"
+				r = requests.patch(url=url, headers=headers, data=json.dumps(post_data), timeout=self.timeout)
+			elif method == HttpMethod.DELETE:
+				r = requests.delete(url=url, headers=headers, timeout=self.timeout)
+			else:
+				raise APIError("Unknown HTTP method")
+		except requests.exceptions.Timeout:
+			raise APIError(f"Read timeout after {self.timeout} seconds")
 
 		if self._debug:
 			print(r.status_code)
