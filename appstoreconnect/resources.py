@@ -2,6 +2,7 @@ import inspect
 from abc import ABC, abstractmethod
 import sys
 
+
 class Resource(ABC):
 
     def __init__(self, data, api):
@@ -82,8 +83,17 @@ class App(Resource):
         'betaTesters': {'multiple': True},
         'builds': {'multiple': True},
         'betaAppReviewDetail': {'multiple': False},
+        'appStoreVersions': {'multiple': True},
     }
     documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/app'
+
+
+class AppStoreVersion(Resource):
+    endpoint = '/v1/appStoreVersions'
+    type = 'appStoreVersions'
+    attributes = ['platform', 'versionString', 'appStoreState', 'copyright', 'releaseType', 'earliestReleaseDate',
+                  'usesIdfa', 'downloadable', 'createdDate']
+    documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/app/relationships/appstoreversions/'
 
 
 class PreReleaseVersion(Resource):
