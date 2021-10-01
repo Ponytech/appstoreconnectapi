@@ -148,6 +148,11 @@ class Territory(Resource):
 class AppStoreReviewDetail(Resource):
 	endpoint = '/v1/appStoreReviewDetails'
 	type = "appStoreReviewDetails"
+	attributes = ['contactEmail', 'contactFirstName', 'contactLastName', 'contactPhone', 'demoAccountName', 'demoAccountPassword', 'demoAccountRequired', 'notes']
+	relationships = {
+		'appStoreVersion': {'multiple': False},
+		'appStoreReviewAttachments': {'multiple': True}
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstorereviewdetail'
 
 class AppStoreVersionLocalizations(Resource):
