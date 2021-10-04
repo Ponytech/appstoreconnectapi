@@ -654,7 +654,7 @@ class Api:
 		"""
 		return self._create_resource(AppStoreVersionSubmission, locals())
 
-	def create_an_app_store_review_detail(self, appStoreVersion: AppStoreVersion, contactEmail: str = None, contactFirstName: str = None, contactLastName: str = None, contactPhone: str = None, demoAccountName: str = None, demoAccountPassword: str = None, demoAccountRequired: bool = None, notes: str = None):
+	def create_an_app_store_review_detail(self, appStoreVersion: AppStoreVersion, demoAccountName: str, demoAccountPassword: str , demoAccountRequired: bool, contactFirstName: str, contactLastName: str, contactEmail: str, contactPhone: str, notes: str):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_review_detail
 		:return: an AppStoreReviewDetail resource
@@ -669,12 +669,12 @@ class Api:
 		"""
 		return self._get_resource(AppStoreReviewDetail, app_store_version_id)
 
-	def modify_an_app_store_review_detail(self, appStoreReviewDetail: AppStoreReviewDetail, contactEmail: str = None, contactFirstName: str = None, contactLastName: str = None, contactPhone: str = None, demoAccountName: str = None, demoAccountPassword: str = None, demoAccountRequired: bool = None, notes: str = None ) -> AppStoreReviewDetail:
+	def modify_an_app_store_review_detail(self, appStoreReviewDetail: AppStoreReviewDetail, demoAccountName: str, demoAccountPassword: str, demoAccountRequired: bool, contactFirstName: str, contactLastName: str, contactEmail: str, contactPhone: str, notes: str) -> AppStoreReviewDetail:
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_review_detail
 		:return: a AppStoreReviewDetail resource
 		"""
-		attributes = {'demoAccountName':demoAccountName, 'demoAccountPassword':demoAccountPassword}
+		attributes = {'demoAccountName':demoAccountName, 'demoAccountPassword':demoAccountPassword, 'demoAccountRequired':demoAccountRequired}
 		print(attributes)
 		return self._modify_resource(appStoreReviewDetail, attributes)
 
