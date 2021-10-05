@@ -1,3 +1,10 @@
+## 0.10.0
+
+Features:
+- Add a timeout parameter (in seconds) for requests
+- Add proxy support
+
+
 ## 0.9.1
 
 Bugfixes:
