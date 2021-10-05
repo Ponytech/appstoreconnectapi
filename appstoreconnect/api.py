@@ -50,7 +50,7 @@ class APIError(Exception):
 
 class Api:
 
-	def __init__(self, key_id, key_file, issuer_id, submit_stats=True, timeout=None):
+	def __init__(self, key_id, key_file, issuer_id, submit_stats=True, timeout=None, proxy=None):
 		self._token = None
 		self.token_gen_date = None
 		self.exp = None
@@ -59,6 +59,7 @@ class Api:
 		self.issuer_id = issuer_id
 		self.submit_stats = submit_stats
 		self.timeout = timeout
+		self.proxy = proxy
 		self._call_stats = defaultdict(int)
 		if self.submit_stats:
 			self._submit_stats("session_start")
@@ -270,7 +271,8 @@ class Api:
 
 		try:
 			if method == HttpMethod.GET:
-				r = requests.get(url, headers=headers, timeout=self.timeout)
+				proxies = {'https': self.proxy} if self.proxy else None
+				r = requests.get(url, headers=headers, timeout=self.timeout, proxies=proxies)
 			elif method == HttpMethod.POST:
 				headers["Content-Type"] = "application/json"
 				r = requests.post(url=url, headers=headers, data=json.dumps(post_data), timeout=self.timeout)
