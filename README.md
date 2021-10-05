@@ -24,6 +24,12 @@ With your *key ID*, *key file* (you can either pass the path to the file or the 
 ```python
 from appstoreconnect import Api, UserRole
 api = Api(key_id, path_to_key_file, issuer_id)
+
+# use a proxy
+api = Api(key_id, path_to_key_file, issuer_id, proxy='http://1.2.3.4:3128')
+
+# set a timeout (in seconds) for requests
+api = Api(key_id, path_to_key_file, issuer_id, timeout=42)
 ```
 
 Here are a few examples of API usage. For a complete list of available methods please see [api.py](https://github.com/Ponytech/appstoreconnectapi/blob/master/appstoreconnect/api.py#L148).
