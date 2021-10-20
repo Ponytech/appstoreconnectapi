@@ -654,6 +654,28 @@ class Api:
 		"""
 		return self._create_resource(AppStoreVersionSubmission, locals())
 
+	def create_an_app_store_review_detail(self, appStoreVersion: AppStoreVersion,  demoAccountName: str, demoAccountPassword: str, demoAccountRequired: bool, contactFirstName: str, contactLastName: str, contactEmail: str, contactPhone: str, notes: str = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_review_detail
+		:return: an AppStoreReviewDetail resource
+		"""
+		return self._create_resource(AppStoreReviewDetail, locals())
+
+	def read_app_store_review_detail_information(self, app_store_version_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_review_detail_information
+		:param app_store_version_id:
+		:return: an AppStoreReviewDetail resource
+		"""
+		return self._get_resource(AppStoreReviewDetail, app_store_version_id)
+
+	def modify_an_app_store_review_detail(self, appStoreReviewDetail: AppStoreReviewDetail, demoAccountName: str, demoAccountPassword: str, demoAccountRequired: bool, contactFirstName: str, contactLastName: str, contactEmail: str, contactPhone: str, notes: str = None) -> AppStoreReviewDetail:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_review_detail
+		:return: a AppStoreReviewDetail resource
+		"""
+		attributes = {'demoAccountName':demoAccountName, 'demoAccountPassword':demoAccountPassword, 'demoAccountRequired':demoAccountRequired, 'contactFirstName':contactFirstName, 'contactLastName':contactLastName, 'contactEmail': contactEmail, 'contactPhone':contactPhone}
+		return self._modify_resource(appStoreReviewDetail, attributes)
 
 	# Provisioning
 	def list_bundle_ids(self, filters=None, sort=None):
