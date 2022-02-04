@@ -59,7 +59,7 @@ class Api:
 		except IOError as e:
 			key = self.key_file
 		self.token_gen_date = datetime.now()
-		exp = int(time.mktime((self.token_gen_date + timedelta(minutes=20)).timetuple()))
+		exp = int(time.mktime((self.token_gen_date + timedelta(minutes=15)).timetuple()))
 		return jwt.encode({'iss': self.issuer_id, 'exp': exp, 'aud': 'appstoreconnect-v1'}, key,
 		                   headers={'kid': self.key_id, 'typ': 'JWT'}, algorithm=ALGORITHM).decode('ascii')
 
