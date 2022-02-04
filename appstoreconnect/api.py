@@ -114,6 +114,7 @@ class Api:
 		url = "%s%s" % (BASE_API, Resource.endpoint)
 		if self._debug:
 			print(post_data)
+
 		payload = self._api_call(url, HttpMethod.POST, post_data)
 
 		return Resource(payload.get('data', {}), self)
@@ -248,6 +249,7 @@ class Api:
 		else:
 			raise APIError("Unknown HTTP method")
 
+
 		content_type = r.headers['content-type']
 
 		if content_type in [ "application/json", "application/vnd.api+json" ]:
@@ -381,6 +383,13 @@ class Api:
 		"""
 		return self._create_resource(BetaGroup, locals())
 
+	def send_an_invitation_to_a_beta_tester(self, app: App, betaTester: BetaTester): #betaTesters list of BetaTester
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/send_an_invitation_to_a_beta_tester
+		:return: a BetaTester resource
+		"""
+		return self._create_resource(BetaTesterInvitation, locals())
+
 	def remove_beta_testers_from_a_beta_group(self, betaGroup: BetaGroup, betaTesters: list):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/remove_beta_testers_from_a_beta_group
@@ -393,10 +402,7 @@ class Api:
 		for betaTester in betaTesters:
 			data = { 'id': betaTester.id, 'type': 'betaTesters'}
 			post_data["data"].append(data)
-
-		return requests.delete(url=url, data = post_data, headers = headers)
-		#post_data = [{'data': [{ 'id': build_id, 'type': 'builds'}]}]
-		#return self._api_call(BASE_API + "/v1/betaGroups/" + betaGroup.id + "/relationships/betaTesters", HttpMethod.DELETE, post_data)
+		return requests.delete(url=url, data = json.dumps(post_data), headers = headers)
 
 
 	def create_beta_group(self, app: App, name: str, publicLinkEnabled: bool = None, publicLinkLimit: int = None, publicLinkLimitEnabled: bool = None) -> BetaGroup:
