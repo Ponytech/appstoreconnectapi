@@ -114,6 +114,7 @@ class Api:
 		url = "%s%s" % (BASE_API, Resource.endpoint)
 		if self._debug:
 			print(post_data)
+
 		payload = self._api_call(url, HttpMethod.POST, post_data)
 
 		return Resource(payload.get('data', {}), self)
@@ -248,6 +249,7 @@ class Api:
 		else:
 			raise APIError("Unknown HTTP method")
 
+
 		content_type = r.headers['content-type']
 
 		if content_type in [ "application/json", "application/vnd.api+json" ]:
@@ -357,12 +359,51 @@ class Api:
 		"""
 		return self._get_resources(BetaTester, filters, sort)
 
+	def list_all_beta_testers_in_a_beta_group(self, betaGroup, filters=None, sort=None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_beta_testers_in_a_beta_group
+		:return: an iterator over BetaTester resources
+		"""
+		full_url = BASE_API + "/v1/betaGroups/" + betaGroup.id + "/betaTesters"
+		return self._get_resources(BetaGroup, None, None, full_url)
+		#return self._api_call(BASE_API + "/v1/betaGroups/" + betaGroup.id + "/betaTesters", HttpMethod.GET)
+		#return self._get_resources(BetaGroup, filters, sort)
+
 	def read_beta_tester_information(self, beta_tester_id: str):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_beta_tester_information
 		:return: a BetaTester resource
 		"""
 		return self._get_resource(BetaTester, beta_tester_id)
+
+	def add_beta_testers_to_a_beta_group(self, betaGroup: BetaGroup, betaTesters: list): #betaTesters list of BetaTester
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/add_beta_testers_to_a_beta_group
+		:return: a BetaTester resource
+		"""
+		return self._create_resource(BetaGroup, locals())
+
+	def send_an_invitation_to_a_beta_tester(self, app: App, betaTester: BetaTester): #betaTesters list of BetaTester
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/send_an_invitation_to_a_beta_tester
+		:return: a BetaTester resource
+		"""
+		return self._create_resource(BetaTesterInvitation, locals())
+
+	def remove_beta_testers_from_a_beta_group(self, betaGroup: BetaGroup, betaTesters: list):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/remove_beta_testers_from_a_beta_group
+		:return: a BetaTester resource
+		"""
+		headers = {"Authorization": "Bearer %s" % self.token}
+		headers["Content-Type"] = "application/json"
+		url = BASE_API + "/v1/betaGroups/" + betaGroup.id + "/relationships/betaTesters"
+		post_data = { 'data': []}
+		for betaTester in betaTesters:
+			data = { 'id': betaTester.id, 'type': 'betaTesters'}
+			post_data["data"].append(data)
+		return requests.delete(url=url, data = json.dumps(post_data), headers = headers)
+
 
 	def create_beta_group(self, app: App, name: str, publicLinkEnabled: bool = None, publicLinkLimit: int = None, publicLinkLimitEnabled: bool = None) -> BetaGroup:
 		"""
@@ -396,6 +437,10 @@ class Api:
 		return self._get_resource(BetaGroup, beta_group_ip)
 
 	def add_build_to_beta_group(self, beta_group_id, build_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/add_builds_to_a_beta_group
+		:return: an BetaGroup resource
+		"""
 		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
 		self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
 

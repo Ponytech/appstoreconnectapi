@@ -60,6 +60,15 @@ class BetaTester(Resource):
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/betatester'
 
+class BetaTesterInvitation(Resource):
+	endpoint = '/v1/betaTesterInvitations'
+	type = 'betaTesterInvitations'
+	attributes = []
+	relationships = {
+		'app': {'multiple': False},
+		'betaTester': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/BetaTesterInvitation'
 
 class BetaGroup(Resource):
 	endpoint = '/v1/betaGroups'
