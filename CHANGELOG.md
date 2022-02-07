@@ -4,6 +4,8 @@ Features:
 - Add a timeout parameter (in seconds) for requests
 - Add proxy support
 
+Bugfixes:
+- Avoid a RecursionError when accessing an unknown attribute on some resources
 
 ## 0.9.1
 

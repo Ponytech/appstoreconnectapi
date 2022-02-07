@@ -2,7 +2,9 @@ import inspect
 from abc import ABC, abstractmethod
 import sys
 
+
 class Resource(ABC):
+	relationships = {}
 
 	def __init__(self, data, api):
 		self._data = data
@@ -24,7 +26,7 @@ class Resource(ABC):
 					return self._api.get_related_resource(full_url=url)
 			return getter
 
-		raise AttributeError('%s have no attributes %s' % (self.type_name, item))
+		raise AttributeError('%s has no attributes %s' % (self.type_name, item))
 
 	def __repr__(self):
 		return '%s id %s' % (self.type_name, self._data.get('id'))
@@ -197,8 +199,6 @@ class Device(Resource):
 	endpoint = '/v1/devices'
 	type = 'devices'
 	attributes = ['name', 'platform', 'udid', 'status']
-	relationships = {
-	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/device/attributes'
 
 
