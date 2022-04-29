@@ -791,9 +791,23 @@ class Api:
 	def modify_app_store_version_localization(self, app_store_version_localization: AppStoreVersionLocalization, description: str, keywords: str, marketingUrl: str, promotionalText: str, supportUrl: str, whatsNew: str ):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization
-		:return: an iterator over AppInfoLocalization resources
+		:return: an iterator over AppStoreVersionLocalization resources
 		"""
 		return self._modify_resource(app_store_version_localization, locals())
+
+	def read_app_store_version_localization_information(self, app_store_version_localization_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_localization_information
+		:return: an iterator over AppStoreVersionLocalization resources
+		"""
+		return self._get_resource(AppStoreVersionLocalization, app_store_version_localization_id)
+
+	def read_app_info_localization_information(self, app_info_localization_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_info_localization_information
+		:return: an iterator over AppInfoLocalization resources
+		"""
+		return self._get_resource(AppInfoLocalization, app_info_localization_id)
 
 	# appStoreInfo localization
 	def list_app_store_info_localizations(self, app_information):

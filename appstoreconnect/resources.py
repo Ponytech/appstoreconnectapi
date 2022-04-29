@@ -191,7 +191,7 @@ class RoutingAppCoverage(Resource):
 class AppInfoLocalization(Resource):
 	endpoint = '/v1/appInfoLocalizations'
 	type = 'appInfoLocalizations'
-	attributes = ['locale', 'name', 'privacyPolicyText', 'privacyPolicyUrl', 'subtitle']
+	attributes = ['locale', 'name', 'privacyPolicyText', 'privacyPolicyUrl', 'subtitle', 'privacyChoicesUrl']
 	relationships = {
 		'appInfo': {'multiple': False},
 	}
