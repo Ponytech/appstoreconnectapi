@@ -210,6 +210,7 @@ class Api:
 				return items[item]
 
 			def __iter__(self):
+				self.index = 0
 				return self
 
 			def __repr__(self):
