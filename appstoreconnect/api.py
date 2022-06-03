@@ -692,6 +692,14 @@ class Api:
 		"""
 		return self._get_resource(BetaAppReviewSubmission, beta_app_id)
 
+	def modify_a_beta_app_review_detail(self, beta_app_review_detail: BetaAppReviewDetail, demoAccountName: str, demoAccountPassword: str, demoAccountRequired: bool, contactFirstName: str, contactLastName: str, contactEmail: str, contactPhone: str, notes: str = None) -> AppStoreReviewDetail:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_app_review_detail
+		:return: an BetaAppReviewDetail resource
+		"""
+		attributes = {'demoAccountName':demoAccountName, 'demoAccountPassword':demoAccountPassword, 'demoAccountRequired':demoAccountRequired, 'contactFirstName':contactFirstName, 'contactLastName':contactLastName, 'contactEmail': contactEmail, 'contactPhone':contactPhone, 'notes': notes}
+		return self._modify_resource(BetaAppReviewDetail, attributes)
+
 	def create_an_app_store_version_submission(self, appStoreVersion: AppStoreVersion):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_submission

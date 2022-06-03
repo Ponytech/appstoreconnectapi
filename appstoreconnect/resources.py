@@ -280,6 +280,7 @@ class BetaBuildLocalization(Resource):
 class BetaAppReviewDetail(Resource):
 	endpoint = '/v1/betaAppReviewDetails'
 	type = 'betaAppReviewDetails'
+	attributes = ['contactEmail', 'contactFirstName', 'contactLastName', 'contactPhone', 'demoAccountName', 'demoAccountPassword', 'demoAccountRequired', 'notes']
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/betaAppReviewDetail/attributes'
 
 
