@@ -698,7 +698,7 @@ class Api:
 		:return: an BetaAppReviewDetail resource
 		"""
 		attributes = {'demoAccountName':demoAccountName, 'demoAccountPassword':demoAccountPassword, 'demoAccountRequired':demoAccountRequired, 'contactFirstName':contactFirstName, 'contactLastName':contactLastName, 'contactEmail': contactEmail, 'contactPhone':contactPhone, 'notes': notes}
-		return self._modify_resource(BetaAppReviewDetail, attributes)
+		return self._modify_resource(beta_app_review_detail, attributes)
 
 	def create_an_app_store_version_submission(self, appStoreVersion: AppStoreVersion):
 		"""
