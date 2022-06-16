@@ -496,12 +496,12 @@ class Api:
 		"""
 		return self._create_resource(BetaAppLocalization, locals())
 
-	def modify_a_beta_app_localization(self, betaAppLocalization: BetaAppLocalization, locale: str, description: str = None, feedbackEmail: str = None, marketingUrl: str = None, privacyPolicyUrl: str = None, tvOsPrivacyPolicy: str = None):
+	def modify_a_beta_app_localization(self, betaAppLocalization: BetaAppLocalization, description: str = None, feedbackEmail: str = None, marketingUrl: str = None, privacyPolicyUrl: str = None, tvOsPrivacyPolicy: str = None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_app_localization
 		:return: an BetaAppLocalization resource
 		"""
-		return self._create_resource(betaAppLocalization, locals())
+		return self._modify_resource(betaAppLocalization, locals())
 
 	def list_app_encryption_declarations(self, filters=None):
 		"""
