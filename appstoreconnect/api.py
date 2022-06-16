@@ -11,8 +11,8 @@ import json
 from typing import List
 from enum import Enum, auto
 
-from .resources import *
-from .__version__ import __version__ as version
+#from .resources import *
+#from .__version__ import __version__ as version
 
 from resources import *
 from __version__ import __version__ as version
@@ -151,49 +151,45 @@ class Api:
 
 		return Resource(payload.get('data', {}), self)
 
-	def _modify_resource(self, resource, args):
+	def _modify_resource(self, Resource, args):
 		attributes = {}
-
-		for attribute in resource.attributes:
+		for attribute in Resource.attributes:
 			if attribute in args and args[attribute] is not None:
-				if type(args[attribute]) == list:
-					value = list(map(lambda e: e.name if isinstance(e, Enum) else e, args[attribute]))
-				elif isinstance(args[attribute], Enum):
-					value = args[attribute].name
+				attributes[attribute] = args[attribute]
+
+		relationships_dict = {}
+		for relation in Resource.relationships.keys():
+			if relation in args and args[relation] is not None:
+				relationships_dict[relation] = {}
+				if Resource.relationships[relation].get('multiple', False):
+					relationships_dict[relation]['data'] = []
+					relationship_objects = args[relation]
+					if type(relationship_objects) is not list:
+						relationship_objects = [relationship_objects]
+					for relationship_object in relationship_objects:
+						relationships_dict[relation]['data'].append({
+							'id': relationship_object.id,
+							'type': relationship_object.type
+						})
 				else:
-					value = args[attribute]
-				attributes[attribute] = value
-
-		relationships = {}
-		if hasattr(resource, 'relationships'):
-			for relationship in resource.relationships:
-				if relationship in args and args[relationship] is not None:
-					relationships[relationship] = {}
-					relationships[relationship]['data'] = []
-					for relationship_object in args[relationship]:
-						relationships[relationship]['data'].append(
-							{
-								'id': relationship_object.id,
-								'type': relationship_object.type
-							}
-						)
-
+					relationships_dict[relation]['data'] = {
+							'id': args[relation].id,
+							'type': args[relation].type
+						}
 		post_data = {
 			'data': {
 				'attributes': attributes,
-				'id': resource.id,
-				'type': resource.type
+				'relationships': relationships_dict,
+				'id': Resource.id,
+				'type': Resource.type
 			}
 		}
-		if len(relationships):
-			post_data['data']['relationships'] = relationships
-
-		url = "%s%s/%s" % (BASE_API, resource.endpoint, resource.id)
+		url = "%s%s/%s" % (BASE_API, Resource.endpoint, Resource.id)
 		if self._debug:
 			print(post_data)
 		payload = self._api_call(url, HttpMethod.PATCH, post_data)
 
-		return type(resource)(payload.get('data', {}), self)
+		return type(Resource)(payload.get('data', {}), self)
 
 	def _delete_resource(self, resource: Resource):
 		url = "%s%s/%s" % (BASE_API, resource.endpoint, resource.id)
