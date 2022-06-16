@@ -258,11 +258,28 @@ class Build(Resource):
 	endpoint = '/v1/builds'
 	type = 'builds'
 	attributes = ['expired', 'iconAssetToken', 'minOsVersion', 'processingState', 'version', 'usesNonExemptEncryption', 'uploadedDate', 'expirationDate']
+	relationships = {
+		'app': {'multiple': False},
+		'appEncryptionDeclaration': {'multiple': False},
+		'individualTesters': {'multiple': True},
+		'preReleaseVersion': {'multiple': False},
+		'betaBuildLocalizations': {'multiple': True},
+		'buildBetaDetail': {'multiple': False},
+		'betaAppReviewSubmission': {'multiple': False},
+		'appStoreVersion': {'multiple': False},
+		'icons': {'multiple': True},
+		'buildBundles': {'multiple': True},
+		'betaGroups': {'multiple': True},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/build/attributes'
 
 
 class BuildBetaDetail(Resource):
 	endpoint = '/v1/buildBetaDetails'
+	attributes = ['autoNotifyEnabled', 'externalBuildState', 'internalBuildState']
+	relationships = {
+		'build': {'multiple': False},
+	}
 	type = 'buildBetaDetails'
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/buildBetaDetail/attributes'
 
@@ -280,6 +297,10 @@ class BetaBuildLocalization(Resource):
 class BetaAppReviewDetail(Resource):
 	endpoint = '/v1/betaAppReviewDetails'
 	type = 'betaAppReviewDetails'
+	attributes = ['contactEmail', 'contactFirstName', 'contactLastName', 'contactPhone', 'demoAccountName', 'demoAccountPassword', 'demoAccountRequired', 'notes']
+	relationships = {
+		'app': {'multiple': False},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/betaAppReviewDetail/attributes'
 
 
