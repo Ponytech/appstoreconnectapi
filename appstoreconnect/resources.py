@@ -1,7 +1,10 @@
+import inspect
 from abc import ABC, abstractmethod
 import sys
 
+
 class Resource(ABC):
+	relationships = {}
 
 	def __init__(self, data, api):
 		self._data = data
@@ -12,24 +15,18 @@ class Resource(ABC):
 			return self._data.get('id')
 		if item in self._data.get('attributes', {}):
 			return self._data.get('attributes', {})[item]
-		if item in self._data.get('relationships', {}):
-			def callable():
+		if item in self.relationships:
+			def getter():
 				# Try to fetch relationship
 				nonlocal item
-				is_resources = item[-1] == 's'
-				try:
-					item_cls = getattr(sys.modules[__name__], item[0].upper() + (item[1:-1] if is_resources else item[1:]))
-				except AttributeError:
-					item_cls = Resource
 				url = self._data.get('relationships', {})[item]['links']['related']
-				# List of resources
-				if is_resources:
-					return self._api._get_resources(item_cls, full_url=url)
+				if self.relationships[item]['multiple']:
+					return self._api.get_related_resources(full_url=url)
 				else:
-					return self._api._get_related_resource(item_cls, full_url=url)
-			return callable
+					return self._api.get_related_resource(full_url=url)
+			return getter
 
-		raise AttributeError('%s have no attributes %s' % (self.type_name, item))
+		raise AttributeError('%s has no attributes %s' % (self.type_name, item))
 
 	def __repr__(self):
 		return '%s id %s' % (self.type_name, self._data.get('id'))
@@ -401,3 +398,9 @@ class AppInfo(Resource):
 
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appinfo'
+
+
+resources = {}
+for name, obj in inspect.getmembers(sys.modules[__name__]):
+	if inspect.isclass(obj) and issubclass(obj, Resource) and hasattr(obj, 'type') and obj != Resource:
+		resources[getattr(obj, 'type')] = obj
