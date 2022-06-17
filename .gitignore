@@ -41,3 +41,18 @@ tramp
 Thumbs.db
 Desktop.ini
 git 
+
+# venv
+.venv/
+
+# Apple AuthKeys
+AuthKey_*
+
+# VSCode
+.vscode
+
+# Files used or generated during dev/testing
+*.csv
+*.p8
+test_api_sales.py
+test_api_finance.py

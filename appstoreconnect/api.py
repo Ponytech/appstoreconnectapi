@@ -8,7 +8,11 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import time
 import json
-from enum import Enum
+from typing import List
+from enum import Enum, auto
+
+#from .resources import *
+#from .__version__ import __version__ as version
 
 from resources import *
 from __version__ import __version__ as version
@@ -17,24 +21,39 @@ ALGORITHM = 'ES256'
 BASE_API = "https://api.appstoreconnect.apple.com"
 
 
+class UserRole(Enum):
+	ADMIN = auto()
+	FINANCE = auto()
+	TECHNICAL = auto()
+	SALES = auto()
+	MARKETING = auto()
+	DEVELOPER = auto()
+	ACCOUNT_HOLDER = auto()
+	READ_ONLY = auto()
+	APP_MANAGER = auto()
+	ACCESS_TO_REPORTS = auto()
+	CUSTOMER_SUPPORT = auto()
+
+
 class HttpMethod(Enum):
 	GET = 1
 	POST = 2
 	PATCH = 3
 	DELETE = 4
 
+
 class APIError(Exception):
-	def __init__(self, error_string, status_code):
+	def __init__(self, error_string, status_code=None):
 		try:
 			self.status_code = int(status_code)
-		except ValueError:
+		except (ValueError, TypeError):
 			pass
 		super().__init__(error_string)
 
 
 class Api:
 
-	def __init__(self, key_id, key_file, issuer_id, submit_stats=False):
+	def __init__(self, key_id, key_file, issuer_id, submit_stats=True, timeout=None, proxy=None):
 		self._token = None
 		self.token_gen_date = None
 		self.exp = None
@@ -42,6 +61,8 @@ class Api:
 		self.key_file = key_file
 		self.issuer_id = issuer_id
 		self.submit_stats = submit_stats
+		self.timeout = timeout
+		self.proxy = proxy
 		self._call_stats = defaultdict(int)
 		if self.submit_stats:
 			self._submit_stats("session_start")
@@ -66,17 +87,29 @@ class Api:
 	def _get_resource(self, Resource, resource_id):
 		url = "%s%s/%s" % (BASE_API, Resource.endpoint, resource_id)
 		payload = self._api_call(url)
-		payloadData = payload.get('data', {})
-		if not payloadData:
-			return None
-		return Resource(payloadData, self)
+		return Resource(payload.get('data', {}), self)
 
-	def _get_related_resource(self, Resource, full_url):
+	def _get_resource_from_payload_data(self, payload):
+		try:
+			resource_type = resources[payload.get('type')]
+		except KeyError:
+			raise APIError("Unsupported resource type %s" % payload.get('type'))
+
+		return resource_type(payload, self)
+
+	def get_related_resource(self, full_url):
 		payload = self._api_call(full_url)
-		payloadData = payload.get('data', {})
-		if not payloadData:
+		data = payload.get('data')
+		if data is None:
 			return None
-		return Resource(payloadData, self)
+		elif type(data) == dict:
+			return self._get_resource_from_payload_data(data)
+
+	def get_related_resources(self, full_url):
+		payload = self._api_call(full_url)
+		data = payload.get('data', [])
+		for resource in data:
+			yield self._get_resource_from_payload_data(resource)
 
 	def _create_resource(self, Resource, args):
 		attributes = {}
@@ -114,7 +147,6 @@ class Api:
 		url = "%s%s" % (BASE_API, Resource.endpoint)
 		if self._debug:
 			print(post_data)
-
 		payload = self._api_call(url, HttpMethod.POST, post_data)
 
 		return Resource(payload.get('data', {}), self)
@@ -227,7 +259,7 @@ class Api:
 	def _api_call(self, url, method=HttpMethod.GET, post_data=None):
 		headers = {"Authorization": "Bearer %s" % self.token}
 		if self._debug:
-			print(url)
+			print("%s %s" % (method.value, url))
 
 		if self._submit_stats:
 			endpoint = url.replace(BASE_API, '')
@@ -236,23 +268,29 @@ class Api:
 			request = "%s %s" % (method.name, endpoint)
 			self._call_stats[request] += 1
 
-		if method == HttpMethod.GET:
-			r = requests.get(url, headers=headers)
-		elif method == HttpMethod.POST:
-			headers["Content-Type"] = "application/json"
-			r = requests.post(url=url, headers=headers, data=json.dumps(post_data))
-		elif method == HttpMethod.PATCH:
-			headers["Content-Type"] = "application/json"
-			r = requests.patch(url=url, headers=headers, data=json.dumps(post_data))
-		elif method == HttpMethod.DELETE:
-			r = requests.delete(url=url, headers=headers)
-		else:
-			raise APIError("Unknown HTTP method")
+		try:
+			if method == HttpMethod.GET:
+				proxies = {'https': self.proxy} if self.proxy else None
+				r = requests.get(url, headers=headers, timeout=self.timeout, proxies=proxies)
+			elif method == HttpMethod.POST:
+				headers["Content-Type"] = "application/json"
+				r = requests.post(url=url, headers=headers, data=json.dumps(post_data), timeout=self.timeout)
+			elif method == HttpMethod.PATCH:
+				headers["Content-Type"] = "application/json"
+				r = requests.patch(url=url, headers=headers, data=json.dumps(post_data), timeout=self.timeout)
+			elif method == HttpMethod.DELETE:
+				r = requests.delete(url=url, headers=headers, timeout=self.timeout)
+			else:
+				raise APIError("Unknown HTTP method")
+		except requests.exceptions.Timeout:
+			raise APIError(f"Read timeout after {self.timeout} seconds")
 
+		if self._debug:
+			print(r.status_code)
 
 		content_type = r.headers['content-type']
 
-		if content_type in [ "application/json", "application/vnd.api+json" ]:
+		if content_type in ["application/json", "application/vnd.api+json"]:
 			payload = r.json()
 			if 'errors' in payload:
 				raise APIError(
@@ -302,6 +340,20 @@ class Api:
 		return self._token
 
 	# Users and Roles
+	def modify_user_account(
+			self,
+			user: User,
+			allAppsVisible: bool = None,
+			provisioningAllowed: bool = None,
+			roles: List[UserRole] = None,
+			visibleApps: List[App] = None,
+	):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_user_account
+		:return: a User resource
+		"""
+		return self._modify_resource(user, locals())
+
 	def list_users(self, filters=None, sort=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_users
@@ -420,6 +472,10 @@ class Api:
 		return self._modify_resource(betaGroup, locals())
 
 	def delete_beta_group(self, betaGroup: BetaGroup):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_a_beta_group
+		:return: a BetaGroup resources
+		"""
 		return self._delete_resource(betaGroup)
 
 	def list_beta_groups(self, filters=None, sort=None):
@@ -442,7 +498,8 @@ class Api:
 		:return: an BetaGroup resource
 		"""
 		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
-		self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
+		payload = self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
+		return BetaGroup(payload.get('data'), {})
 
 	# App Resources
 	def read_app_information(self, app_ip):
@@ -817,14 +874,14 @@ class Api:
 		"""
 		return self._get_resource(AppStoreVersionLocalization, app_store_version_localization_id)
 
+	# appStoreInfo localization
 	def read_app_info_localization_information(self, app_info_localization_id):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_info_localization_information
 		:return: an iterator over AppInfoLocalization resources
 		"""
 		return self._get_resource(AppInfoLocalization, app_info_localization_id)
-
-	# appStoreInfo localization
+		
 	def list_app_store_info_localizations(self, app_information):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_info_localizations_for_an_app_info
