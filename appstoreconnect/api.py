@@ -40,12 +40,13 @@ class HttpMethod(Enum):
 
 
 class APIError(Exception):
-	def __init__(self, error_string, status_code=None):
+	def __init__(self, errors, status_code=None):
+		self.errors = errors
 		try:
 			self.status_code = int(status_code)
 		except (ValueError, TypeError):
 			pass
-		super().__init__(error_string)
+		super().__init__(errors)
 
 
 class Api:
@@ -294,10 +295,7 @@ class Api:
 		if content_type in ["application/json", "application/vnd.api+json"]:
 			payload = r.json()
 			if 'errors' in payload:
-				raise APIError(
-					payload.get('errors', [])[0].get('detail', 'Unknown error'),
-				 	payload.get('errors', [])[0].get('status', None)
-				)
+				raise APIError(payload.get('errors'))
 			return payload
 		elif content_type == 'application/a-gzip':
 			# TODO implement stream decompress
