@@ -289,7 +289,7 @@ class Api:
 		if self._debug:
 			print(r.status_code)
 
-		content_type = r.headers['content-type']
+		content_type = r.headers.get('content-type')
 
 		if content_type in ["application/json", "application/vnd.api+json"]:
 			payload = r.json()
