@@ -17,7 +17,7 @@ VERSION = None
 REQUIRED = [
     'requests>=2.20.1,==2.*',
     'PyJWT>=1.6.4,==1.*',
-    'cryptography>=2.6.1,==2.*',
+    'cryptography>=2.6.1',
 ]
 
 EXTRAS = {
