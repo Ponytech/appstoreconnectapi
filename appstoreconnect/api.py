@@ -452,8 +452,7 @@ class Api:
 
 	def add_build_to_beta_group(self, beta_group_id, build_id):
 		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
-		payload = self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
-		return BetaGroup(payload.get('data'), {})
+		self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
 
 	# App Resources
 	def read_app_information(self, app_ip):
