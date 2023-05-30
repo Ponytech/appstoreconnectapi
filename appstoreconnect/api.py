@@ -79,7 +79,7 @@ class Api:
 		self.token_gen_date = datetime.now()
 		exp = int(time.mktime((self.token_gen_date + timedelta(minutes=20)).timetuple()))
 		return jwt.encode({'iss': self.issuer_id, 'exp': exp, 'aud': 'appstoreconnect-v1'}, key,
-		                   headers={'kid': self.key_id, 'typ': 'JWT'}, algorithm=ALGORITHM).decode('ascii')
+		                   headers={'kid': self.key_id, 'typ': 'JWT'}, algorithm=ALGORITHM)
 
 	def _get_resource(self, Resource, resource_id):
 		url = "%s%s/%s" % (BASE_API, Resource.endpoint, resource_id)
@@ -669,9 +669,9 @@ class Api:
 		# setup required filters if not provided
 		default_versions = {
 			'SALES': '1_0',
-			'SUBSCRIPTION': '1_2',
-			'SUBSCRIPTION_EVENT': '1_2',
-			'SUBSCRIBER': '1_2',
+			'SUBSCRIPTION': '1_3',
+			'SUBSCRIPTION_EVENT': '1_3',
+			'SUBSCRIBER': '1_3',
 			'NEWSSTAND': '1_0',
 			'PRE_ORDER': '1_0',
 		}
