@@ -669,9 +669,9 @@ class Api:
 		# setup required filters if not provided
 		default_versions = {
 			'SALES': '1_0',
-			'SUBSCRIPTION': '1_2',
-			'SUBSCRIPTION_EVENT': '1_2',
-			'SUBSCRIBER': '1_2',
+			'SUBSCRIPTION': '1_3',
+			'SUBSCRIPTION_EVENT': '1_3',
+			'SUBSCRIBER': '1_3',
 			'NEWSSTAND': '1_0',
 			'PRE_ORDER': '1_0',
 		}
