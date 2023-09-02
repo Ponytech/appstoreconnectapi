@@ -1,3 +1,9 @@
+## 0.10.1
+Bugfixes:
+- Relax cryptography dependencies (@conformist-mw)
+- Do not assume presence of content-type header (@jaysoffian)
+- Fix a possible RecursionError 
+
 ## 0.10.0
 
 Features:
