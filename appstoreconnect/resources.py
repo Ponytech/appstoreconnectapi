@@ -57,6 +57,15 @@ class BetaTester(Resource):
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/betatester'
 
+class BetaTesterInvitation(Resource):
+	endpoint = '/v1/betaTesterInvitations'
+	type = 'betaTesterInvitations'
+	attributes = []
+	relationships = {
+		'app': {'multiple': False},
+		'betaTester': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/BetaTesterInvitation'
 
 class BetaGroup(Resource):
 	endpoint = '/v1/betaGroups'
@@ -69,6 +78,130 @@ class BetaGroup(Resource):
 	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/betagroup'
 
+
+
+# App Metadata Resources
+
+class AppScreenshot(Resource):
+	endpoint = '/v1/appScreenshots'
+	type = 'appScreenshots'
+	attributes = ['assetDeliveryState', 'assetToken', 'assetType', 'fileName', 'fileSize', 'imageAsset', 'sourceFileChecksum', 'uploadOperations', 'uploaded']
+	relationships = {
+		'appScreenshotSet': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appscreenshot'
+
+class AppScreenshotSet(Resource):
+	endpoint = '/v1/appScreenshotSets'
+	type = 'appScreenshotSets'
+	attributes = ['screenshotDisplayType']
+	relationships = {
+		'appScreenshots': {'multiple': True},
+		'appStoreVersionLocalization': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appscreenshotset'
+
+class AppStoreVersionLocalization(Resource):
+	endpoint = '/v1/appStoreVersionLocalizations'
+	type = 'appStoreVersionLocalizations'
+	attributes = ['description', 'keywords', 'locale', 'marketingUrl', 'promotionalText', 'supportUrl', 'whatsNew']
+	relationships = {
+		'appPreviewSets': {'multiple': True},
+		'appScreenshotSets': {'multiple': True},
+		'appStoreVersion': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization'
+
+class AgeRatingDeclarations(Resource):
+	endpoint = '/v1/ageRatingDeclarations'
+	attributes = ['alcoholTobaccoOrDrugUseOrReferences', 'gamblingAndContests', 'kidsAgeBand', 'medicalOrTreatmentInformation',
+	'profanityOrCrudeHumor', 'sexualContentOrNudity', 'unrestrictedWebAccess', 'gamblingSimulated', 'horrorOrFearThemes',
+	'matureOrSuggestiveThemes', 'sexualContentGraphicAndNudity', 'violenceCartoonOrFantasy', 'violenceRealistic', 'violenceRealisticProlongedGraphicOrSadistic']
+	relationships = {}
+	type = 'ageRatingDeclarations'
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/ageratingdeclaration'
+
+class AppStoreVersion(Resource):
+	endpoint = '/v1/appStoreVersions'
+	type = 'appStoreVersions'
+	attributes = ['platform', 'appStoreState', 'copyright', 'earliestReleaseDate', 'releaseType', 'usesIdfa', 'versionString', 'downloadable', 'createdDate']
+	relationships = {
+		'app': {'multiple': False},
+		'ageRatingDeclaration': {'multiple': False},
+		'appStoreReviewDetail': {'multiple': False},
+		'appStoreVersionLocalizations': {'multiple': True},
+		'appStoreVersionPhasedRelease': {'multiple': False},
+		'appStoreVersionSubmission': {'multiple': False},
+		'build': {'multiple': False},
+		'idfaDeclaration': {'multiple': False},
+		'routingAppCoverage': {'multiple': False},
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversion'
+
+class AgeRatingDeclaration(Resource):
+	endpoint = '/v1/ageRatingDeclarations'
+	type = "ageRatingDeclarations"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/ageratingdeclaration'
+
+class Territory(Resource):
+	endpoint = '/v1/territories'
+	type = 'territories'
+	attributes = 'currency'
+	relationships = {}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/territory'
+
+
+class AppStoreReviewDetail(Resource):
+	endpoint = '/v1/appStoreReviewDetails'
+	type = "appStoreReviewDetails"
+	attributes = ['contactEmail', 'contactFirstName', 'contactLastName', 'contactPhone', 'demoAccountName', 'demoAccountPassword', 'demoAccountRequired', 'notes']
+	relationships = {
+		'appStoreVersion': {'multiple': False},
+		'appStoreReviewAttachments': {'multiple': True}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstorereviewdetail'
+
+class AppStoreVersionLocalizations(Resource):
+	endpoint = '/v1/appStoreVersionLocalizations'
+	type = "appStoreVersionLocalizations"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionlocalization'
+
+class AppStoreVersionSubmission(Resource):
+	endpoint = '/v1/appStoreVersionSubmissions'
+	type = "appStoreVersionSubmissions"
+	attributes = []
+	relationships = {
+		'appStoreVersion': {'multiple': False}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionsubmission'
+
+class IdfaDeclaration(Resource):
+	endpoint = '/v1/idfaDeclarations'
+	type = "idfaDeclarations"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/idfadeclaration'
+
+class RoutingAppCoverage(Resource):
+	endpoint = '/v1/routingAppCoverages'
+	type = "routingAppCoverages"
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/routingappcoverages'
+
+class AppInfoLocalization(Resource):
+	endpoint = '/v1/appInfoLocalizations'
+	type = 'appInfoLocalizations'
+	attributes = ['locale', 'name', 'privacyPolicyText', 'privacyPolicyUrl', 'subtitle', 'privacyChoicesUrl']
+	relationships = {
+		'appInfo': {'multiple': False},
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appinfolocalization'
+
+class AppStoreVersionPhasedRelease(Resource):
+	endpoint = '/v1/appStoreVersionPhasedReleases'
+	type = 'appStoreVersionPhasedReleases'
+	attributes = ['currentDayNumber', 'phasedReleaseState', 'startDate', 'totalPauseDuration']
+	relationships = {
+		'appStoreVersion': {'multiple': False},
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appstoreversionphasedrelease'
 
 # App Resources
 
@@ -90,7 +223,7 @@ class App(Resource):
 
 class PreReleaseVersion(Resource):
 	endpoint = '/v1/preReleaseVersions'
-	type = 'preReleaseVersions'
+	type = 'preReleaseVersion'
 	attributes = ['platform', 'version']
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/preReleaseVersion/attributes'
 
@@ -121,7 +254,7 @@ class BetaLicenseAgreement(Resource):
 class Build(Resource):
 	endpoint = '/v1/builds'
 	type = 'builds'
-	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/build/attributes'
+	attributes = ['expired', 'iconAssetToken', 'minOsVersion', 'processingState', 'version', 'usesNonExemptEncryption', 'uploadedDate', 'expirationDate']
 	relationships = {
 		'app': {'multiple': False},
 		'appEncryptionDeclaration': {'multiple': False},
@@ -132,11 +265,18 @@ class Build(Resource):
 		'betaAppReviewSubmission': {'multiple': False},
 		'appStoreVersion': {'multiple': False},
 		'icons': {'multiple': True},
+		'buildBundles': {'multiple': True},
+		'betaGroups': {'multiple': True},
 	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/build/attributes'
 
 
 class BuildBetaDetail(Resource):
 	endpoint = '/v1/buildBetaDetails'
+	attributes = ['autoNotifyEnabled', 'externalBuildState', 'internalBuildState']
+	relationships = {
+		'build': {'multiple': False},
+	}
 	type = 'buildBetaDetails'
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/buildBetaDetail/attributes'
 
@@ -154,6 +294,10 @@ class BetaBuildLocalization(Resource):
 class BetaAppReviewDetail(Resource):
 	endpoint = '/v1/betaAppReviewDetails'
 	type = 'betaAppReviewDetails'
+	attributes = ['contactEmail', 'contactFirstName', 'contactLastName', 'contactPhone', 'demoAccountName', 'demoAccountPassword', 'demoAccountRequired', 'notes']
+	relationships = {
+		'app': {'multiple': False},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/betaAppReviewDetail/attributes'
 
 
@@ -171,11 +315,6 @@ class BetaAppReviewSubmission(Resource):
 
 class User(Resource):
 	endpoint = '/v1/users'
-	type = 'users'
-	attributes = ['allAppsVisible', 'provisioningAllowed', 'roles']
-	relationships = {
-		'visibleApps': {'multiple': True},
-	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/user/attributes'
 
 
@@ -187,6 +326,13 @@ class UserInvitation(Resource):
 # Provisioning
 class BundleId(Resource):
 	endpoint = '/v1/bundleIds'
+	type = 'bundleIds'
+	attributes = ['identifier', 'name', 'platform', 'seedId']
+	relationships = {
+		'profiles': {'multiple': True},
+		'bundleIdCapabilities': {'multiple': True},
+		'app': {'multiple': False},
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/bundleid/attributes'
 
 
@@ -199,13 +345,21 @@ class Device(Resource):
 	endpoint = '/v1/devices'
 	type = 'devices'
 	attributes = ['name', 'platform', 'udid', 'status']
+	relationships = {
+	}
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/device/attributes'
 
 
 class Profile(Resource):
 	endpoint = '/v1/profiles'
 	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/profile/attributes'
-
+	type = 'profiles'
+	attributes = ['name', 'platform', 'profileContent', 'uuid', 'createdDate', 'profileState', 'profileType', 'expirationDate']
+	relationships = {
+		'certificates': {'multiple': True},
+		'devices': {'multiple': True},
+		'bundleId': {'multiple': False},
+	}
 
 # Reporting
 
@@ -218,8 +372,34 @@ class SalesReport(Resource):
 	endpoint = '/v1/salesReports'
 	filters = 'https://developer.apple.com/documentation/appstoreconnectapi/download_sales_and_trends_reports'
 
+class AppCategory(Resource):
+	endpoint = '/v1/appCategories'
+	type = 'appCategories'
+	attributes = ['platforms']
+	relationships = {
+		'parent': {'multiple': False},
+		'subcategories': {'multiple': True}
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appcategory'
 
-# create an index of Resources by type
+class AppInfo(Resource):
+	endpoint = '/v1/appInfos'
+	type = 'appInfos'
+	attributes = ['appStoreAgeRating', 'appStoreState', 'brazilAgeRating', 'kidsAgeBand']
+	relationships = {
+		'app': {'multiple': False},
+		'appInfoLocalizations': {'multiple': True},
+		'primaryCategory': {'multiple': False},
+		'primarySubcategoryOne': {'multiple': False},
+		'primarySubcategoryTwo': {'multiple': False},
+		'secondaryCategory': {'multiple': False},
+		'secondarySubcategoryOne': {'multiple': False},
+		'secondarySubcategoryTwo': {'multiple': False}
+
+	}
+	documentation = 'https://developer.apple.com/documentation/appstoreconnectapi/appinfo'
+
+
 resources = {}
 for name, obj in inspect.getmembers(sys.modules[__name__]):
 	if inspect.isclass(obj) and issubclass(obj, Resource) and hasattr(obj, 'type') and obj != Resource:

@@ -11,8 +11,11 @@ import json
 from typing import List
 from enum import Enum, auto
 
-from .resources import *
-from .__version__ import __version__ as version
+#from .resources import *
+#from .__version__ import __version__ as version
+
+from resources import *
+from __version__ import __version__ as version
 
 ALGORITHM = 'ES256'
 BASE_API = "https://api.appstoreconnect.apple.com"
@@ -77,7 +80,7 @@ class Api:
 		except IOError as e:
 			key = self.key_file
 		self.token_gen_date = datetime.now()
-		exp = int(time.mktime((self.token_gen_date + timedelta(minutes=20)).timetuple()))
+		exp = int(time.mktime((self.token_gen_date + timedelta(minutes=15)).timetuple()))
 		return jwt.encode({'iss': self.issuer_id, 'exp': exp, 'aud': 'appstoreconnect-v1'}, key,
 		                   headers={'kid': self.key_id, 'typ': 'JWT'}, algorithm=ALGORITHM).decode('ascii')
 
@@ -148,49 +151,45 @@ class Api:
 
 		return Resource(payload.get('data', {}), self)
 
-	def _modify_resource(self, resource, args):
+	def _modify_resource(self, Resource, args):
 		attributes = {}
-
-		for attribute in resource.attributes:
+		for attribute in Resource.attributes:
 			if attribute in args and args[attribute] is not None:
-				if type(args[attribute]) == list:
-					value = list(map(lambda e: e.name if isinstance(e, Enum) else e, args[attribute]))
-				elif isinstance(args[attribute], Enum):
-					value = args[attribute].name
+				attributes[attribute] = args[attribute]
+
+		relationships_dict = {}
+		for relation in Resource.relationships.keys():
+			if relation in args and args[relation] is not None:
+				relationships_dict[relation] = {}
+				if Resource.relationships[relation].get('multiple', False):
+					relationships_dict[relation]['data'] = []
+					relationship_objects = args[relation]
+					if type(relationship_objects) is not list:
+						relationship_objects = [relationship_objects]
+					for relationship_object in relationship_objects:
+						relationships_dict[relation]['data'].append({
+							'id': relationship_object.id,
+							'type': relationship_object.type
+						})
 				else:
-					value = args[attribute]
-				attributes[attribute] = value
-
-		relationships = {}
-		if hasattr(resource, 'relationships'):
-			for relationship in resource.relationships:
-				if relationship in args and args[relationship] is not None:
-					relationships[relationship] = {}
-					relationships[relationship]['data'] = []
-					for relationship_object in args[relationship]:
-						relationships[relationship]['data'].append(
-							{
-								'id': relationship_object.id,
-								'type': relationship_object.type
-							}
-						)
-
+					relationships_dict[relation]['data'] = {
+							'id': args[relation].id,
+							'type': args[relation].type
+						}
 		post_data = {
 			'data': {
 				'attributes': attributes,
-				'id': resource.id,
-				'type': resource.type
+				'relationships': relationships_dict,
+				'id': Resource.id,
+				'type': Resource.type
 			}
 		}
-		if len(relationships):
-			post_data['data']['relationships'] = relationships
-
-		url = "%s%s/%s" % (BASE_API, resource.endpoint, resource.id)
+		url = "%s%s/%s" % (BASE_API, Resource.endpoint, Resource.id)
 		if self._debug:
 			print(post_data)
 		payload = self._api_call(url, HttpMethod.PATCH, post_data)
 
-		return type(resource)(payload.get('data', {}), self)
+		return type(Resource)(payload.get('data', {}), self)
 
 	def _delete_resource(self, resource: Resource):
 		url = "%s%s/%s" % (BASE_API, resource.endpoint, resource.id)
@@ -412,12 +411,51 @@ class Api:
 		"""
 		return self._get_resources(BetaTester, filters, sort)
 
+	def list_all_beta_testers_in_a_beta_group(self, betaGroup, filters=None, sort=None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_beta_testers_in_a_beta_group
+		:return: an iterator over BetaTester resources
+		"""
+		full_url = BASE_API + "/v1/betaGroups/" + betaGroup.id + "/betaTesters"
+		return self._get_resources(BetaGroup, None, None, full_url)
+		#return self._api_call(BASE_API + "/v1/betaGroups/" + betaGroup.id + "/betaTesters", HttpMethod.GET)
+		#return self._get_resources(BetaGroup, filters, sort)
+
 	def read_beta_tester_information(self, beta_tester_id: str):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_beta_tester_information
 		:return: a BetaTester resource
 		"""
 		return self._get_resource(BetaTester, beta_tester_id)
+
+	def add_beta_testers_to_a_beta_group(self, betaGroup: BetaGroup, betaTesters: list): #betaTesters list of BetaTester
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/add_beta_testers_to_a_beta_group
+		:return: a BetaTester resource
+		"""
+		return self._create_resource(BetaGroup, locals())
+
+	def send_an_invitation_to_a_beta_tester(self, app: App, betaTester: BetaTester): #betaTesters list of BetaTester
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/send_an_invitation_to_a_beta_tester
+		:return: a BetaTester resource
+		"""
+		return self._create_resource(BetaTesterInvitation, locals())
+
+	def remove_beta_testers_from_a_beta_group(self, betaGroup: BetaGroup, betaTesters: list):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/remove_beta_testers_from_a_beta_group
+		:return: a BetaTester resource
+		"""
+		headers = {"Authorization": "Bearer %s" % self.token}
+		headers["Content-Type"] = "application/json"
+		url = BASE_API + "/v1/betaGroups/" + betaGroup.id + "/relationships/betaTesters"
+		post_data = { 'data': []}
+		for betaTester in betaTesters:
+			data = { 'id': betaTester.id, 'type': 'betaTesters'}
+			post_data["data"].append(data)
+		return requests.delete(url=url, data = json.dumps(post_data), headers = headers)
+
 
 	def create_beta_group(self, app: App, name: str, publicLinkEnabled: bool = None, publicLinkLimit: int = None, publicLinkLimitEnabled: bool = None) -> BetaGroup:
 		"""
@@ -434,6 +472,10 @@ class Api:
 		return self._modify_resource(betaGroup, locals())
 
 	def delete_beta_group(self, betaGroup: BetaGroup):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_a_beta_group
+		:return: a BetaGroup resources
+		"""
 		return self._delete_resource(betaGroup)
 
 	def list_beta_groups(self, filters=None, sort=None):
@@ -451,6 +493,10 @@ class Api:
 		return self._get_resource(BetaGroup, beta_group_ip)
 
 	def add_build_to_beta_group(self, beta_group_id, build_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/add_builds_to_a_beta_group
+		:return: an BetaGroup resource
+		"""
 		post_data = {'data': [{ 'id': build_id, 'type': 'builds'}]}
 		payload = self._api_call(BASE_API + "/v1/betaGroups/" + beta_group_id + "/relationships/builds", HttpMethod.POST, post_data)
 		return BetaGroup(payload.get('data'), {})
@@ -463,6 +509,14 @@ class Api:
 		:return: an App resource
 		"""
 		return self._get_resource(App, app_ip)
+
+	def list_app_infos(self, app_id: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_infos_for_an_app
+		:return: an iterator over AppCategory resources
+		"""
+		full_url = BASE_API + "/v1/apps/" + app_id + "/appInfos"
+		return self._get_resources(AppInfo, None, None, full_url)
 
 	def list_apps(self, filters=None, sort=None):
 		"""
@@ -499,6 +553,13 @@ class Api:
 		"""
 		return self._create_resource(BetaAppLocalization, locals())
 
+	def modify_a_beta_app_localization(self, betaAppLocalization: BetaAppLocalization, description: str = None, feedbackEmail: str = None, marketingUrl: str = None, privacyPolicyUrl: str = None, tvOsPrivacyPolicy: str = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_app_localization
+		:return: an BetaAppLocalization resource
+		"""
+		return self._modify_resource(betaAppLocalization, locals())
+
 	def list_app_encryption_declarations(self, filters=None):
 		"""
 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_app_encryption_declarations
@@ -512,6 +573,113 @@ class Api:
 		:return: an iterator over BetaLicenseAgreement resources
 		"""
 		return self._get_resources(BetaLicenseAgreement, filters)
+
+	# App Metadata Resources
+	def list_app_store_versions(self, app_id: str, filters=None, sort=None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_versions_for_an_app
+		:return: an iterator over AppStoreVersion resources
+		"""
+		full_url = BASE_API + "/v1/apps/" + app_id + "/appStoreVersions"
+		return self._get_resources(AppStoreVersion, filters, sort, full_url)
+
+	def modify_age_rating_declarations(self, Resource, args):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_age_rating_declaration
+		:return: an iterator over AgeRatingDeclarations resources
+		"""
+		return self._modify_resource(Resource, args)
+
+	def read_age_rating_declarations_info(self, app_store_version_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_the_age_rating_declaration_information_of_an_app_store_version
+		:return: an iterator over AgeRatingDeclarations resources
+		"""
+		url = BASE_API + "/v1/appStoreVersions/" + app_store_version_id + "/ageRatingDeclaration"
+		payload = self._api_call(url)
+		return AgeRatingDeclarations(payload.get('data', {}), self)
+
+	def list_all_app_screenshots_sets_for_an_app_store_version_localization(self, app_store_version_localization_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_screenshot_sets_for_an_app_store_version_localization
+		:return: an iterator over AppScreenshotSet resources
+		"""
+		url = BASE_API + "/v1/appStoreVersionLocalizations/" + app_store_version_localization_id + "/appScreenshotSets"
+		return self._get_resources(AppScreenshotSet, None, None, url)
+
+	def list_all_app_screenshots_for_an_app_screenshot_set(self, app_screen_shot_set_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_screenshots_for_an_app_screenshot_set
+		:return: an iterator over AppScreenshot resources
+		"""
+		url = BASE_API + "/v1/appScreenshotSets/" + app_screen_shot_set_id + "/appScreenshots"
+		return self._get_resources(AppScreenshot, None, None, url)
+
+	def create_an_app_screenshot_set(self, screenshotDisplayType: str, appStoreVersionLocalization: AppStoreVersionLocalization):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_screenshot_set
+		:return: an iterator over AppScreenshotSet resources
+		"""
+		return self._create_resource(AppScreenshotSet, locals())
+
+	def delete_an_app_screenshot_set(self, appScreenshotSet: AppScreenshotSet):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_screenshot_set
+		:return: an iterator over AppScreenshotSet resources
+		"""
+		return self._delete_resource(appScreenshotSet)
+
+
+	def modify_an_app_screenshot(self, app_screenshot: AppScreenshot, sourceFileChecksum: str, uploaded: bool):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_screenshot
+		:return: an iterator over AppScreenshot resources
+		"""
+		attributes = {'sourceFileChecksum':sourceFileChecksum, 'uploaded':uploaded}
+		return self._modify_resource(app_screenshot, attributes)
+
+	def create_an_asset_reservation(self, appScreenshotSet: AppScreenshotSet, fileSize: int, fileName: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/uploading_assets_to_app_store_connect
+		:return: an iterator over AppScreenshot resources
+		"""
+		return self._create_resource(AppScreenshot, locals())
+
+	def upload_the_asset(self, upload_operation, binary):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/uploading_assets_to_app_store_connect
+		:return: an json answer
+		"""
+		headers = {}
+		url = upload_operation['url']
+
+		for header in upload_operation['requestHeaders']:
+			headers[header['name']] = header['value']
+
+		return requests.put(url=url, data = binary, headers = headers)
+
+	def read_app_screenshot_information(self, app_screenshot_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_screenshot_information
+		:return: an iterator over AppScreenshot resource
+		"""
+		return self._get_resource(AppScreenshot, app_screenshot_id)
+
+	def delete_an_app_screenshot(self, app_screenshot):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_screenshot
+		:return: an iterator over AppScreenshot resource
+		"""
+		return self._delete_resource(app_screenshot)
+
+	def replace_all_app_screenshots_for_an_app_screenshot_set(self, app_screenshot_set, data):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/replace_all_app_screenshots_for_an_app_screenshot_set
+		:return: an iterator over AppScreenshotSet resource
+		"""
+		post_data = {"data": data }
+		return self._api_call(BASE_API + "/v1/appScreenshotSets/" + app_screenshot_set.id + "/relationships/appScreenshots", HttpMethod.PATCH, post_data)
+
 
 	# Build Resources
 	def list_builds(self, filters=None, sort=None):
@@ -588,6 +756,44 @@ class Api:
 		"""
 		return self._get_resource(BetaAppReviewSubmission, beta_app_id)
 
+	def modify_a_beta_app_review_detail(self, beta_app_review_detail: BetaAppReviewDetail, demoAccountName: str, demoAccountPassword: str, demoAccountRequired: bool, contactFirstName: str, contactLastName: str, contactEmail: str, contactPhone: str, notes: str = None) -> AppStoreReviewDetail:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_a_beta_app_review_detail
+		:return: an BetaAppReviewDetail resource
+		"""
+		attributes = {'demoAccountName':demoAccountName, 'demoAccountPassword':demoAccountPassword, 'demoAccountRequired':demoAccountRequired, 'contactFirstName':contactFirstName, 'contactLastName':contactLastName, 'contactEmail': contactEmail, 'contactPhone':contactPhone, 'notes': notes}
+		return self._modify_resource(beta_app_review_detail, attributes)
+
+	def create_an_app_store_version_submission(self, appStoreVersion: AppStoreVersion):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_submission
+		:return: an AppStoreVersionSubmission resource
+		"""
+		return self._create_resource(AppStoreVersionSubmission, locals())
+
+	def create_an_app_store_review_detail(self, appStoreVersion: AppStoreVersion,  demoAccountName: str, demoAccountPassword: str, demoAccountRequired: bool, contactFirstName: str, contactLastName: str, contactEmail: str, contactPhone: str, notes: str = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_review_detail
+		:return: an AppStoreReviewDetail resource
+		"""
+		return self._create_resource(AppStoreReviewDetail, locals())
+
+	def read_app_store_review_detail_information(self, app_store_version_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_review_detail_information
+		:param app_store_version_id:
+		:return: an AppStoreReviewDetail resource
+		"""
+		return self._get_resource(AppStoreReviewDetail, app_store_version_id)
+
+	def modify_an_app_store_review_detail(self, appStoreReviewDetail: AppStoreReviewDetail, demoAccountName: str, demoAccountPassword: str, demoAccountRequired: bool, contactFirstName: str, contactLastName: str, contactEmail: str, contactPhone: str, notes: str = None) -> AppStoreReviewDetail:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_review_detail
+		:return: a AppStoreReviewDetail resource
+		"""
+		attributes = {'demoAccountName':demoAccountName, 'demoAccountPassword':demoAccountPassword, 'demoAccountRequired':demoAccountRequired, 'contactFirstName':contactFirstName, 'contactLastName':contactLastName, 'contactEmail': contactEmail, 'contactPhone':contactPhone}
+		return self._modify_resource(appStoreReviewDetail, attributes)
+
 	# Provisioning
 	def list_bundle_ids(self, filters=None, sort=None):
 		"""
@@ -630,6 +836,149 @@ class Api:
 		:return: an iterator over Profile resources
 		"""
 		return self._get_resources(Profile, filters, sort)
+
+	def read_profile(self, profileId):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_and_download_profile_information
+		:return: an iterator over Profile resources
+		"""
+		return self._get_resource(Profile, profileId)
+
+	def get_build_info(self, build_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_build_information
+		:return: an iterator over Build resources
+		"""
+		return self._get_resource(Build, build_id)
+
+	# appStoreVersions localization
+	def list_app_store_version_localizations(self, app_store_version):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_store_version_localizations_for_an_app_store_version
+		:return: an iterator over AppStoreVersionLocalization resources
+		"""
+		full_url = BASE_API + f"/v1/appStoreVersions/{app_store_version.id}/appStoreVersionLocalizations"
+		return self._get_resources(AppStoreVersionLocalization, None, None, full_url)
+
+	def modify_app_store_version_localization(self, app_store_version_localization: AppStoreVersionLocalization, description: str, keywords: str, marketingUrl: str, promotionalText: str, supportUrl: str, whatsNew: str ):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_localization
+		:return: an iterator over AppStoreVersionLocalization resources
+		"""
+		return self._modify_resource(app_store_version_localization, locals())
+
+	def read_app_store_version_localization_information(self, app_store_version_localization_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_store_version_localization_information
+		:return: an iterator over AppStoreVersionLocalization resources
+		"""
+		return self._get_resource(AppStoreVersionLocalization, app_store_version_localization_id)
+
+	# appStoreInfo localization
+	def read_app_info_localization_information(self, app_info_localization_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_info_localization_information
+		:return: an iterator over AppInfoLocalization resources
+		"""
+		return self._get_resource(AppInfoLocalization, app_info_localization_id)
+		
+	def list_app_store_info_localizations(self, app_information):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_app_info_localizations_for_an_app_info
+		:return: an iterator over AppInfoLocalization resources
+		"""
+		full_url = BASE_API + f"/v1/appInfos/{app_information.id}/appInfoLocalizations"
+		return self._get_resources(AppInfoLocalization, None, None, full_url)
+
+	def modify_app_store_info_localization(self, app_info_localization: AppInfoLocalization, name: str, privacyPolicyUrl: str, subtitle: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_info_localization
+		:return: an iterator over AppInfoLocalization resources
+		"""
+		return self._modify_resource(app_info_localization, locals())
+
+	# App Metadata
+	def modify_app_store_version(self, app_store_version: AppStoreVersion, versionString: str, copyright: str, build: Build = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version
+		:return: a Device resource
+		"""
+		return self._modify_resource(app_store_version, locals())
+
+	def delete_app_store_version(self, app_store_version: AppStoreVersion):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version
+		:return: None
+		"""
+		return self._delete_resource(app_store_version)
+
+	def create_new_app_store_version(self, platform: str, versionString: str, copyright: str, app: App, build: Build = None) -> AppStoreVersion:
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version
+		:return: a AppStoreVersion resource
+		"""
+		return self._create_resource(AppStoreVersion, locals())
+
+	def read_app_category_info(self, app_category_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_app_category_information
+		:return: an iterator over AppCategory resources
+		"""
+		return self._get_resource(AppCategory, app_category_id)
+
+	def list_all_available_territories_for_an_app(self, app_id):
+ 		"""
+ 		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_all_available_territories_for_an_app
+ 		:return: an iterator over Territory resources
+ 		"""
+ 		full_url = BASE_API + "/v1/apps/" + app_id + "/availableTerritories?limit=200"
+ 		return self._get_resources(Territory, None, None, full_url)
+
+	def list_territories(self):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/list_territories
+		:return: an iterator over a list of Territory resources
+		"""
+		return self._get_resources(Territory, None, None, None)
+
+	#App Store Version Phased RELEASE
+	def create_an_app_store_version_phased_release(self, phased_release_state: str, appStoreVersion: AppStoreVersion):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/create_an_app_store_version_phased_release
+		:return: an iterator over AppStoreVersionPhasedRelease resources
+		"""
+		return self._create_resource(AppStoreVersionPhasedRelease, locals())
+
+	def read_the_app_store_version_phased_release_information_of_an_app_store_version(self, resource_id):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/read_the_app_store_version_phased_release_information_of_an_app_store_version
+		:return: an iterator over AppStoreVersionPhasedRelease resources
+		"""
+		url = f"https://api.appstoreconnect.apple.com/v1/appStoreVersions/{resource_id}/appStoreVersionPhasedRelease"
+		return self._get_related_resource(AppStoreVersionPhasedRelease, url)
+
+	def delete_an_app_store_version_phased_release(self, appStoreVersionPhasedRelease: AppStoreVersionPhasedRelease ):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/delete_an_app_store_version_phased_release
+		:return: an empty iterator over a list of AppStoreVersionPhasedRelease resources
+		"""
+		return self._delete_resource(appStoreVersionPhasedRelease)
+
+	def modify_an_app_store_version_phased_release(self, appStoreVersionPhasedRelease: AppStoreVersionPhasedRelease, phasedReleaseState: str):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_store_version_phased_release
+		:return: an iterator over a list of AppStoreVersionPhasedRelease resources
+		"""
+		return self._modify_resource(appStoreVersionPhasedRelease, locals())
+	# App info Resources
+
+	def modify_app_info(self, app_information: AppInfo, primaryCategory: str = None, secondaryCategory:str = None):
+		"""
+		:reference: https://developer.apple.com/documentation/appstoreconnectapi/modify_an_app_info
+		:return: an iterator over AppInfo resources
+		"""
+		return self._modify_resource(app_information, locals())
+
 
 	# Reporting
 	def download_finance_reports(self, filters=None, split_response=False, save_to=None):
